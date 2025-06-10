@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+
+{% block title %}Educational Resources - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-graduation-cap me-2"></i>Educational Resources</h1>
+    <div class="btn-group">
+        <a href="{{ url_for('main.education') }}" class="btn btn-outline-primary {% if not category %}active{% endif %}">All</a>
+        <a href="{{ url_for('main.education', category='basics') }}" class="btn btn-outline-primary {% if category == 'basics' %}active{% endif %}">Basics</a>
+        <a href="{{ url_for('main.education', category='technical') }}" class="btn btn-outline-primary {% if category == 'technical' %}active{% endif %}">Technical Analysis</a>
+        <a href="{{ url_for('main.education', category='fundamental') }}" class="btn btn-outline-primary {% if category == 'fundamental' %}active{% endif %}">Fundamental Analysis</a>
+        <a href="{{ url_for('main.education', category='strategies') }}" class="btn btn-outline-primary {% if category == 'strategies' %}active{% endif %}">Investment Strategies</a>
+    </div>
+</div>
+
+<!-- Education Header -->
+<div class="row align-items-center mb-5 p-4 bg-light rounded shadow-sm enhanced-header">
+    <div class="col-lg-7">
+        <h2 class="display-4 mb-3">Learn to Invest Wisely</h2>
+        <p class="lead">Explore our comprehensive educational articles to build your knowledge about stock markets, investment strategies, and financial analysis.</p>
+        <p class="subtitle">Whether you're a beginner or an experienced investor, our educational resources will help you make informed investment decisions.</p>
+        <div class="d-flex flex-wrap mt-4">
+            <div class="me-4 mb-3 feature-box">
+                <h5><i class="fas fa-chart-line me-2"></i> Market Analysis</h5>
+                <p>Learn technical and fundamental analysis techniques to evaluate stocks.</p>
+            </div>
+            <div class="me-4 mb-3 feature-box">
+                <h5><i class="fas fa-balance-scale me-2"></i> Risk Management</h5>
+                <p>Understand how to manage risk and build a balanced portfolio.</p>
+            </div>
+            <div class="me-4 mb-3 feature-box">
+                <h5><i class="fas fa-book me-2"></i> Investment Strategies</h5>
+                <p>Discover various investment strategies for different market conditions.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <img src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11" class="img-fluid rounded shadow" alt="Investment Education">
+    </div>
+</div>
+
+{% if category %}
+<div class="alert alert-info mb-4">
+    <i class="fas fa-filter me-2"></i> Showing articles in category: <strong>{{ category|title }}</strong>
+    <a href="{{ url_for('main.education') }}" class="float-end">Clear filter</a>
+</div>
+{% endif %}
+
+<!-- Articles List -->
+<div class="row g-4">
+    {% if articles %}
+        {% for article in articles %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ article.title }}</h5>
+                    <p class="card-text text-muted small mb-2">
+                        <i class="fas fa-user me-1"></i> {{ article.author }}
+                        <i class="fas fa-calendar-alt ms-2 me-1"></i> {{ article.created_at.strftime('%b %d, %Y') }}
+                        {% if article.category %}
+                        <span class="badge bg-primary ms-2">{{ article.category }}</span>
+                        {% endif %}
+                    </p>
+                    <p class="card-text">{{ article.content[:150] + '...' if article.content|length > 150 else article.content }}</p>
+                </div>
+                <div class="card-footer bg-transparent text-end">
+                    <a href="{{ url_for('main.article', article_id=article.id) }}" class="btn btn-sm btn-primary">Read More</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No articles found{% if category %} in this category{% endif %}.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Education Benefits -->
+<div class="card mt-5 border-0 bg-light">
+    <div class="card-body p-4">
+        <h3 class="mb-4 text-center">Why Education is Important for Investors</h3>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-chart-line fa-2x text-primary"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Make Informed Decisions</h5>
+                        <p>Understanding market fundamentals helps you make better investment choices based on data and analysis.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-shield-alt fa-2x text-primary"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Manage Risk</h5>
+                        <p>Learn to identify potential risks and implement strategies to protect your investment portfolio.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-seedling fa-2x text-primary"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Long-term Growth</h5>
+                        <p>Develop the knowledge to build a sustainable investment strategy for consistent growth over time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if current_user.is_admin %}
+<div class="text-center mt-4">
+    <a href="{{ url_for('admin.new_article') }}" class="btn btn-success">
+        <i class="fas fa-plus-circle me-1"></i> Create New Article
+    </a>
+</div>
+{% endif %}
+{% endblock %}

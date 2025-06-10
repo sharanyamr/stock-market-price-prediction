@@ -1,0 +1,370 @@
+{% extends "layout.html" %}
+
+{% block title %}Currency Converter - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-exchange-alt me-2"></i>Currency Converter</h1>
+</div>
+
+<!-- Currency Converter Header -->
+<div class="row align-items-center mb-5 p-4 bg-light rounded shadow-sm enhanced-header">
+    <div class="col-lg-7">
+        <h2 class="display-4 mb-3">Easy Currency Conversion</h2>
+        <p class="lead">Convert between major world currencies with real-time exchange rates.</p>
+        <p class="subtitle">Whether you're planning international investments or tracking your global portfolio, our currency converter keeps you informed about the latest exchange rates.</p>
+        <div class="mt-4">
+            <div class="feature-box p-3 mb-3">
+                <h5><i class="fas fa-globe me-2"></i> Global Coverage</h5>
+                <p>Access exchange rates for all major world currencies in one place.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <img src="https://images.unsplash.com/photo-1580519542036-c47de6196ba5" class="img-fluid rounded shadow" alt="Currency Exchange">
+    </div>
+</div>
+
+<!-- Currency Converter Card -->
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow border-0">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Convert Currencies</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="amount" value="1" min="0.01" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fromCurrency" class="form-label">From Currency</label>
+                            <select class="form-select" id="fromCurrency">
+                                <option value="USD" selected>USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="JPY">JPY - Japanese Yen</option>
+                                <option value="AUD">AUD - Australian Dollar</option>
+                                <option value="CAD">CAD - Canadian Dollar</option>
+                                <option value="CHF">CHF - Swiss Franc</option>
+                                <option value="CNY">CNY - Chinese Yuan</option>
+                                <option value="INR">INR - Indian Rupee</option>
+                                <option value="MXN">MXN - Mexican Peso</option>
+                                <option value="BRL">BRL - Brazilian Real</option>
+                                <option value="RUB">RUB - Russian Ruble</option>
+                                <option value="KRW">KRW - South Korean Won</option>
+                                <option value="SGD">SGD - Singapore Dollar</option>
+                                <option value="NZD">NZD - New Zealand Dollar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
+                        <button class="btn btn-outline-secondary swap-btn" id="swapCurrencies">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label for="result" class="form-label">Converted Amount</label>
+                            <input type="text" class="form-control" id="result" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="toCurrency" class="form-label">To Currency</label>
+                            <select class="form-select" id="toCurrency">
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR" selected>EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="JPY">JPY - Japanese Yen</option>
+                                <option value="AUD">AUD - Australian Dollar</option>
+                                <option value="CAD">CAD - Canadian Dollar</option>
+                                <option value="CHF">CHF - Swiss Franc</option>
+                                <option value="CNY">CNY - Chinese Yuan</option>
+                                <option value="INR">INR - Indian Rupee</option>
+                                <option value="MXN">MXN - Mexican Peso</option>
+                                <option value="BRL">BRL - Brazilian Real</option>
+                                <option value="RUB">RUB - Russian Ruble</option>
+                                <option value="KRW">KRW - South Korean Won</option>
+                                <option value="SGD">SGD - Singapore Dollar</option>
+                                <option value="NZD">NZD - New Zealand Dollar</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid">
+                    <button class="btn btn-primary" id="convertBtn">Convert</button>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="alert alert-info d-none" id="conversionInfo">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0" id="conversionDetail"></p>
+                                <p class="mb-0 small" id="conversionTimestamp"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exchange Rate Table -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Popular Exchange Rates</h5>
+                <button class="btn btn-sm btn-outline-primary" id="refreshRates">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh Rates
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Currency</th>
+                                <th>Rate (vs USD)</th>
+                                <th>Change (24h)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratesTableBody">
+                            <tr>
+                                <td colspan="3" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent text-center text-muted">
+                <small>Exchange rates are updated regularly from reliable financial data sources.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Currency Converter Info -->
+<div class="row mt-5">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 bg-light">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4">Why Use a Currency Converter?</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-globe fa-3x text-primary mb-3"></i>
+                            <h5>International Investing</h5>
+                            <p>Calculate the value of foreign investments in your local currency to better understand your portfolio's global performance.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                            <h5>Track Currency Trends</h5>
+                            <p>Monitor exchange rate movements to identify potential investment opportunities in foreign markets.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-balance-scale fa-3x text-primary mb-3"></i>
+                            <h5>Risk Management</h5>
+                            <p>Understand currency exposure and manage foreign exchange risk in your international investments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    const fromCurrencySelect = document.getElementById('fromCurrency');
+    const toCurrencySelect = document.getElementById('toCurrency');
+    const resultInput = document.getElementById('result');
+    const convertBtn = document.getElementById('convertBtn');
+    const swapBtn = document.getElementById('swapCurrencies');
+    const conversionInfo = document.getElementById('conversionInfo');
+    const conversionDetail = document.getElementById('conversionDetail');
+    const conversionTimestamp = document.getElementById('conversionTimestamp');
+    const refreshRatesBtn = document.getElementById('refreshRates');
+    const ratesTableBody = document.getElementById('ratesTableBody');
+    
+    // Convert currency function
+    function convertCurrency() {
+        const amount = parseFloat(amountInput.value);
+        const fromCurrency = fromCurrencySelect.value;
+        const toCurrency = toCurrencySelect.value;
+        
+        if (isNaN(amount) || amount <= 0) {
+            showAlert('Please enter a valid amount', 'danger');
+            return;
+        }
+        
+        // Show loading
+        resultInput.value = 'Converting...';
+        conversionInfo.classList.add('d-none');
+        
+        // Fetch conversion rate from API
+        fetch(`/api/currency-rates?from=${fromCurrency}&to=${toCurrency}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showAlert(`Error: ${data.error}`, 'danger');
+                    resultInput.value = '';
+                    return;
+                }
+                
+                const rate = data.rate;
+                const convertedAmount = amount * rate;
+                
+                // Display result
+                resultInput.value = convertedAmount.toFixed(2);
+                
+                // Show conversion details
+                conversionInfo.classList.remove('d-none');
+                conversionDetail.textContent = `1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`;
+                conversionTimestamp.textContent = `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+            })
+            .catch(error => {
+                console.error('Error fetching conversion rate:', error);
+                showAlert('Error fetching conversion rate. Please try again.', 'danger');
+                resultInput.value = '';
+            });
+    }
+    
+    // Swap currencies function
+    function swapCurrencies() {
+        const fromValue = fromCurrencySelect.value;
+        const toValue = toCurrencySelect.value;
+        
+        fromCurrencySelect.value = toValue;
+        toCurrencySelect.value = fromValue;
+        
+        // If there's already a result, recalculate
+        if (resultInput.value && resultInput.value !== 'Converting...') {
+            convertCurrency();
+        }
+    }
+    
+    // Load popular rates function
+    function loadPopularRates() {
+        ratesTableBody.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        // Popular currencies
+        const currencies = ['EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY'];
+        
+        // Fetch rates for each currency
+        Promise.all(currencies.map(currency => 
+            fetch(`/api/currency-rates?from=USD&to=${currency}`)
+                .then(response => response.json())
+        ))
+        .then(results => {
+            // Clear loading indicator
+            ratesTableBody.innerHTML = '';
+            
+            // Add row for each currency
+            results.forEach((data, index) => {
+                if (data.error) return;
+                
+                const currency = currencies[index];
+                const rate = data.rate;
+                
+                // Generate random change for demonstration
+                // In a real app, this would come from historical data
+                const change = (Math.random() * 2 - 1) * 0.02; // Random between -1% and 1%
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${currency}</td>
+                    <td>${rate.toFixed(4)}</td>
+                    <td class="${change >= 0 ? 'text-success' : 'text-danger'}">
+                        ${change >= 0 ? '+' : ''}${(change * 100).toFixed(2)}%
+                    </td>
+                `;
+                
+                ratesTableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading popular rates:', error);
+            ratesTableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-center text-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Error loading exchange rates. Please try again.
+                    </td>
+                </tr>
+            `;
+        });
+    }
+    
+    // Event listeners
+    convertBtn.addEventListener('click', convertCurrency);
+    
+    amountInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            convertCurrency();
+        }
+    });
+    
+    swapBtn.addEventListener('click', swapCurrencies);
+    
+    refreshRatesBtn.addEventListener('click', loadPopularRates);
+    
+    // Initial conversion and rates load
+    convertCurrency();
+    loadPopularRates();
+});
+
+// Show alert message
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    if (!alertContainer) return;
+    
+    const alertElement = document.createElement('div');
+    alertElement.className = `alert alert-${type} alert-dismissible fade show`;
+    alertElement.setAttribute('role', 'alert');
+    
+    alertElement.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    alertContainer.innerHTML = '';
+    alertContainer.appendChild(alertElement);
+    
+    // Automatically remove after 5 seconds
+    setTimeout(() => {
+        alertElement.classList.remove('show');
+        setTimeout(() => {
+            if (alertContainer.contains(alertElement)) {
+                alertContainer.removeChild(alertElement);
+            }
+        }, 150);
+    }, 5000);
+}
+</script>
+{% endblock %}

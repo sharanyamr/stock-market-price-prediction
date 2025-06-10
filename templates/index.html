@@ -1,0 +1,241 @@
+{% extends "layout.html" %}
+
+{% block title %}StockSage - Smart Stock Market Predictions{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">Intelligent Stock Market Prediction</h1>
+            <p class="lead mb-4">Make smarter investment decisions with AI-powered stock predictions, sentiment analysis, and portfolio management tools.</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg px-4 me-md-2">Go to Dashboard</a>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg px-4">Login</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1470&auto=format&fit=crop" class="img-fluid rounded-3 shadow" alt="Stock market dashboard">
+        </div>
+    </div>
+</section>
+
+<!-- Market Movers -->
+<section class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Market Movers</h2>
+        <a href="{{ url_for('main.prediction') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="row">
+        {% if stock_data %}
+            {% for symbol, data in stock_data.items() %}
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title stock-symbol">{{ symbol }}</h5>
+                        <div class="stock-price">₹{{ data.price }}</div>
+                        <div class="{% if data.percent_change >= 0 %}stock-change-positive{% else %}stock-change-negative{% endif %}">
+                            {{ "+" if data.percent_change >= 0 else "" }}{{ data.percent_change }}% 
+                            <i class="fas fa-arrow-{{ 'up' if data.percent_change >= 0 else 'down' }}"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{{ url_for('main.prediction', symbol=symbol) }}" class="btn btn-sm btn-outline-primary w-100">View Prediction</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Stock data is currently unavailable. Please check back later.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features -->
+<section class="mt-5">
+    <h2 class="text-center mb-5">Powerful Tools for Smart Investing</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-chart-line fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="card-title h5">AI-Powered Predictions</h3>
+                    <p class="card-text">Our advanced machine learning models (ARIMA, LSTM, Linear Regression) analyze historical data to predict future stock movements.</p>
+                </div>
+                <div class="card-footer bg-transparent text-center">
+                    <a href="{{ url_for('main.prediction') }}" class="btn btn-sm btn-outline-primary">Try Predictions</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-comments fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="card-title h5">Sentiment Analysis</h3>
+                    <p class="card-text">Gauge market sentiment by analyzing thousands of tweets and social media posts about stocks and companies.</p>
+                </div>
+                <div class="card-footer bg-transparent text-center">
+                    <a href="{{ url_for('main.sentiment') }}" class="btn btn-sm btn-outline-primary">Analyze Sentiment</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-briefcase fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="card-title h5">Portfolio Management</h3>
+                    <p class="card-text">Track your investments, simulate trades, and visualize your portfolio performance and allocation.</p>
+                </div>
+                <div class="card-footer bg-transparent text-center">
+                    <a href="{{ url_for('portfolio.index') }}" class="btn btn-sm btn-outline-primary">Manage Portfolio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Articles -->
+<section class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Featured Education</h2>
+        <a href="{{ url_for('main.education') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="row">
+        {% if featured_articles %}
+            {% for article in featured_articles %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ article.title }}</h5>
+                        <p class="card-text text-muted small">
+                            <i class="fas fa-user me-1"></i> {{ article.author }} 
+                            <i class="fas fa-calendar-alt ms-2 me-1"></i> {{ article.created_at.strftime('%b %d, %Y') }}
+                        </p>
+                        <p class="card-text">{{ article.content[:150] + '...' if article.content|length > 150 else article.content }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{{ url_for('main.article', article_id=article.id) }}" class="btn btn-sm btn-outline-primary">Read More</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No featured articles available at the moment.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Latest News -->
+<section class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Latest News</h2>
+        <a href="{{ url_for('main.news') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="row">
+        {% if latest_news %}
+            {% for news in latest_news %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ news.title }}</h5>
+                        <p class="card-text text-muted small">
+                            <i class="fas fa-newspaper me-1"></i> {{ news.source }} 
+                            <i class="fas fa-calendar-alt ms-2 me-1"></i> {{ news.published_at.strftime('%b %d, %Y') }}
+                        </p>
+                        <p class="card-text">{{ news.content[:150] + '...' if news.content|length > 150 else news.content }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{{ news.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Read Full Article</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No news articles available at the moment.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="mt-5 py-5 bg-primary text-white rounded shadow-lg" style="color: #fff;">
+    <div class="text-center mb-5">
+        <h2 style="color: #fff; font-weight: 800; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">WHY INVESTORS TRUST STOCKSAGE</h2>
+        <p class="lead" style="color: #fff; font-weight: 600; font-size: 1.3rem;">Advanced analysis backed by machine learning and real-time data</p>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow" style="background: rgba(255,255,255,0.9); transform: translateY(0); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=120&q=80" alt="Analytics" class="rounded-circle me-3" width="70" height="70" style="object-fit: cover; border: 3px solid #0d6efd;">
+                                <div>
+                                    <h5 class="mb-0" style="color: #0d6efd; font-weight: 700; font-size: 1.3rem;">Diverse Prediction Models</h5>
+                                    <p class="mb-0" style="color: #444; font-weight: 500;">Multiple algorithms for comprehensive analysis</p>
+                                </div>
+                            </div>
+                            <p style="color: #333; font-size: 1.05rem;">By combining multiple prediction models (ARIMA, LSTM, and Linear Regression), our platform provides a more balanced and reliable forecast than single-model approaches.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow" style="background: rgba(255,255,255,0.9); transform: translateY(0); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=120&q=80" alt="Social Media" class="rounded-circle me-3" width="70" height="70" style="object-fit: cover; border: 3px solid #0d6efd;">
+                                <div>
+                                    <h5 class="mb-0" style="color: #0d6efd; font-weight: 700; font-size: 1.3rem;">Social Sentiment Analysis</h5>
+                                    <p class="mb-0" style="color: #444; font-weight: 500;">Beyond just technical indicators</p>
+                                </div>
+                            </div>
+                            <p style="color: #333; font-size: 1.05rem;">Our Twitter sentiment analysis assesses public opinion about stocks, providing insights beyond traditional metrics to help you make more informed investment decisions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="mt-5 text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="display-6 mb-4">Ready to make smarter investment decisions?</h2>
+            <p class="lead mb-4">Join thousands of investors using StockSage to predict market movements and optimize their portfolios.</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg px-4 me-sm-3">Go to Dashboard</a>
+                <a href="{{ url_for('main.prediction') }}" class="btn btn-outline-primary btn-lg px-4">Try Predictions</a>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-sm-3">Create Account</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg px-4">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

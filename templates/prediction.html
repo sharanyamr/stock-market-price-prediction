@@ -1,0 +1,792 @@
+{% extends "layout.html" %}
+
+{% block body_attributes %}data-is-indian-stock="{{ is_indian_stock|lower }}"{% endblock %}
+
+{% block title %}Stock Prediction - {{ symbol }} - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-chart-line me-2"></i>Stock Price Prediction</h1>
+    <div class="d-flex">
+        <form method="GET" action="{{ url_for('main.prediction') }}" class="d-flex me-2">
+            <div class="input-group">
+                <input type="text" class="form-control" name="symbol" id="symbolInput" placeholder="Enter stock symbol" value="{{ symbol }}" required>
+                <select class="form-select" name="exchange" id="exchangeSelect" style="max-width: 120px;">
+                    <option value="" {% if not exchange %}selected{% endif %}>Auto</option>
+                    <option value="NASDAQ" {% if exchange == 'NASDAQ' %}selected{% endif %}>NASDAQ</option>
+                    <option value="NSE" {% if exchange == 'NSE' %}selected{% endif %}>NSE</option>
+                    <option value="BSE" {% if exchange == 'BSE' %}selected{% endif %}>BSE</option>
+                </select>
+                <button class="btn btn-primary" type="submit">Analyze</button>
+            </div>
+        </form>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="periodDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ period }}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="periodDropdown">
+                <li><a class="dropdown-item" href="{{ url_for('main.prediction', symbol=symbol, period='1d', exchange=exchange) }}">1 Day</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.prediction', symbol=symbol, period='5d', exchange=exchange) }}">5 Days</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.prediction', symbol=symbol, period='1mo', exchange=exchange) }}">1 Month</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.prediction', symbol=symbol, period='3mo', exchange=exchange) }}">3 Months</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.prediction', symbol=symbol, period='6mo', exchange=exchange) }}">6 Months</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.prediction', symbol=symbol, period='1y', exchange=exchange) }}">1 Year</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.prediction', symbol=symbol, period='2y', exchange=exchange) }}">2 Years</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.prediction', symbol=symbol, period='5y', exchange=exchange) }}">5 Years</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% if exchange or (is_indian_stock and modified_symbol) %}
+    <div class="col-12 mb-3">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            {% if exchange %}
+                <strong>Exchange: {{ exchange }}</strong>
+                {% if modified_symbol %}
+                    - Using symbol <strong>{{ modified_symbol }}</strong> to fetch accurate data.
+                {% endif %}
+            {% elif is_indian_stock and modified_symbol %}
+                <strong>Indian Stock Detected:</strong> Using {{ 'NSE' if modified_symbol.endswith('.NS') else 'BSE' }} data for {{ symbol }}. 
+                The symbol has been automatically modified to <strong>{{ modified_symbol }}</strong> to fetch accurate data.
+            {% endif %}
+            <p class="mb-0 mt-1 small">Tip: When searching for stocks, you can specify the exchange (NASDAQ, NSE, BSE) or let the system auto-detect. For Indian stocks, you can also use the full exchange symbol (e.g., TCS.NS for NSE or TCS.BO for BSE).</p>
+        </div>
+    </div>
+    {% endif %}
+    <!-- Stock Price Chart -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">{{ symbol }} Historical Price</h5>
+            </div>
+            <div class="card-body">
+                <!-- Historical Price Chart -->
+                <div class="chart-container mb-4" style="position: relative; height:300px; width:100%">
+                    <h5 class="mb-3">Historical Price Chart for {{ symbol }}</h5>
+                    <canvas id="historicalPriceChart"></canvas>
+                </div>
+                
+                <!-- Historical Price Table -->
+                <div class="table-responsive">
+                    <h5 class="mb-3">Historical Prices for {{ symbol }}</h5>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Close Price ({{ "₹" if is_indian_stock else "$" }})</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for date, price in historical_data %}
+                            <tr>
+                                <td>{{ date }}</td>
+                                <td>{{ "₹" if is_indian_stock else "$" }}{{ "%.2f"|format(price) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stock Info Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">{{ symbol }} Overview</h5>
+            </div>
+            <div class="card-body">
+                <!-- Stock info content - directly rendered -->
+                <div id="stock-info">
+                    <h2 class="company-name">{{ symbol }}</h2>
+                    <div class="d-flex align-items-center mb-3">
+                        {% if historical_data and historical_data|length > 0 %}
+                            {% set last_price = historical_data[-1][1] %}
+                            {% set first_price = historical_data[0][1] %}
+                            {% set price_change = last_price - first_price %}
+                            {% set percent_change = (price_change / first_price * 100)|round(2) %}
+                            
+                            <h3 class="stock-price me-2">{{ "₹" if is_indian_stock else "$" }}{{ last_price|round(2) }}</h3>
+                            <span class="stock-change badge {% if percent_change >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                <i class="fas fa-{% if percent_change >= 0 %}arrow-up{% else %}arrow-down{% endif %} me-1"></i>
+                                {% if percent_change >= 0 %}+{% endif %}{{ percent_change }}%
+                            </span>
+                        {% else %}
+                            <h3 class="stock-price me-2">{{ "₹" if is_indian_stock else "$" }}0.00</h3>
+                            <span class="stock-change badge bg-secondary">
+                                <i class="fas fa-minus me-1"></i> 0.00%
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th>Open</th>
+                                <td class="stock-open">
+                                    {% if historical_data and historical_data|length > 0 %}
+                                        {{ "₹" if is_indian_stock else "$" }}{{ historical_data[0][1]|round(2) }}
+                                    {% else %}
+                                        {{ "₹" if is_indian_stock else "$" }}0.00
+                                    {% endif %}
+                                </td>
+                                <th>High</th>
+                                <td class="stock-high">
+                                    {% if historical_data and historical_data|length > 0 %}
+                                        {% set high_price = namespace(value=historical_data[0][1]) %}
+                                        {% for date, price in historical_data %}
+                                            {% if price > high_price.value %}
+                                                {% set high_price.value = price %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {{ "₹" if is_indian_stock else "$" }}{{ high_price.value|round(2) }}
+                                    {% else %}
+                                        {{ "₹" if is_indian_stock else "$" }}0.00
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Low</th>
+                                <td class="stock-low">
+                                    {% if historical_data and historical_data|length > 0 %}
+                                        {% set low_price = namespace(value=historical_data[0][1]) %}
+                                        {% for date, price in historical_data %}
+                                            {% if price < low_price.value %}
+                                                {% set low_price.value = price %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {{ "₹" if is_indian_stock else "$" }}{{ low_price.value|round(2) }}
+                                    {% else %}
+                                        {{ "₹" if is_indian_stock else "$" }}0.00
+                                    {% endif %}
+                                </td>
+                                <th>Volume</th>
+                                <td class="stock-volume">{{ "~" }}{{ '{:,}'.format((1000000 * historical_data|length)|int) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="d-grid gap-2">
+                        <!-- Buy/Sell Buttons have been removed as requested -->
+                        
+                        <!-- Portfolio and Sentiment Links -->
+                        <a href="{{ url_for('portfolio.add_stock') }}?symbol={{ symbol }}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-1"></i> Add to Portfolio
+                        </a>
+                        <a href="{{ url_for('main.sentiment', symbol=symbol) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-comments me-1"></i> View Sentiment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buy/Sell Recommendation Section -->
+<div class="col-12 mb-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Trading Recommendation</h5>
+        </div>
+        <div class="card-body">
+            {% if predictions and predictions.overall_signal %}
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                    <div class="recommendation-badge p-4 rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 200px; height: 200px; background-color: {{ '#28a745' if predictions.overall_signal == 'buy' else ('#dc3545' if predictions.overall_signal == 'sell' else '#6c757d') }}; color: white;">
+                        <div>
+                            <h1 class="display-4 mb-0">
+                                <i class="fas {% if predictions.overall_signal == 'buy' %}fa-arrow-up{% elif predictions.overall_signal == 'sell' %}fa-arrow-down{% else %}fa-minus{% endif %}"></i>
+                            </h1>
+                            <h2 class="text-uppercase mb-0">{{ predictions.overall_signal }}</h2>
+                            <p class="mb-0">{{ predictions.confidence }}% confidence</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <h4>Technical Analysis Summary</h4>
+                    <p>Our analysis indicates a <strong>{{ predictions.overall_prediction }}</strong> outlook for {{ symbol }} with {{ predictions.confidence }}% confidence.</p>
+                    
+                    <div class="mt-3">
+                        <h5>Signal Breakdown</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Indicator</th>
+                                        <th>Signal</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Generate technical indicators based on model predictions -->
+                                    {% if predictions.overall_signal %}
+                                    <tr>
+                                        <td>Price Trend</td>
+                                        <td>
+                                            <span class="badge {% if predictions.overall_signal == 'buy' %}bg-success{% elif predictions.overall_signal == 'sell' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                {{ predictions.overall_signal|upper }}
+                                            </span>
+                                        </td>
+                                        <td>Overall price trend based on model predictions</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Moving Average</td>
+                                        <td>
+                                            <span class="badge {% if predictions.overall_signal == 'buy' %}bg-success{% elif predictions.overall_signal == 'sell' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                {{ predictions.overall_signal|upper }}
+                                            </span>
+                                        </td>
+                                        <td>Short-term moving average analysis</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Momentum</td>
+                                        <td>
+                                            <span class="badge {% if predictions.overall_signal == 'buy' %}bg-success{% elif predictions.overall_signal == 'sell' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                {{ predictions.overall_signal|upper }}
+                                            </span>
+                                        </td>
+                                        <td>Price momentum indicator</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">No technical indicators available</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h5>Price Targets</h5>
+                        <div class="row">
+                            <!-- Simplified price targets section -->
+                            <div class="col-md-4 mb-2">
+                                <div class="card">
+                                    <div class="card-body p-2 text-center">
+                                        <h6>Short Term (1 Week)</h6>
+                                        {% if predictions and 'Linear Regression' in predictions and predictions['Linear Regression'].status == 'success' and predictions['Linear Regression'].predictions %}
+                                            {% set price = predictions['Linear Regression'].predictions[-1].price %}
+                                            {% set change = predictions['Linear Regression'].predictions[-1].change_percent %}
+                                            <h4 class="mb-0">
+                                                {% if is_indian_stock %}
+                                                    ₹{{ price|round(2) }}
+                                                {% else %}
+                                                    ${{ (price / 83.5)|round(2) }}
+                                                    <small class="text-muted fs-6">(₹{{ price|round(2) }})</small>
+                                                {% endif %}
+                                            </h4>
+                                            <span class="badge {% if change > 0 %}bg-success{% elif change < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                {% if change > 0 %}+{% endif %}{{ change|round(2) }}%
+                                            </span>
+                                        {% else %}
+                                            <h4 class="mb-0">--</h4>
+                                            <span class="badge bg-secondary">0.00%</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Medium-term target (1 month) -->
+                            <div class="col-md-4 mb-2">
+                                <div class="card">
+                                    <div class="card-body p-2 text-center">
+                                        <h6>Medium Term (1 Month)</h6>
+                                        {% if predictions and 'Linear Regression' in predictions and predictions['Linear Regression'].status == 'success' and predictions['Linear Regression'].predictions %}
+                                            {% set base_price = predictions['Linear Regression'].predictions[0].price %}
+                                            {% set change = 5.0 %}
+                                            {% if predictions.overall_signal == 'buy' %}
+                                                {% set change = 5.0 %}
+                                            {% elif predictions.overall_signal == 'sell' %}
+                                                {% set change = -5.0 %}
+                                            {% else %}
+                                                {% set change = 1.0 %}
+                                            {% endif %}
+                                            {% set price = base_price * (1 + change / 100) %}
+                                            <h4 class="mb-0">
+                                                {% if is_indian_stock %}
+                                                    ₹{{ price|round(2) }}
+                                                {% else %}
+                                                    ${{ (price / 83.5)|round(2) }}
+                                                    <small class="text-muted fs-6">(₹{{ price|round(2) }})</small>
+                                                {% endif %}
+                                            </h4>
+                                            <span class="badge {% if change > 0 %}bg-success{% elif change < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                {% if change > 0 %}+{% endif %}{{ change|round(2) }}%
+                                            </span>
+                                        {% else %}
+                                            <h4 class="mb-0">--</h4>
+                                            <span class="badge bg-secondary">0.00%</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Long-term target (3 months) -->
+                            <div class="col-md-4 mb-2">
+                                <div class="card">
+                                    <div class="card-body p-2 text-center">
+                                        <h6>Long Term (3 Months)</h6>
+                                        {% if predictions and 'Linear Regression' in predictions and predictions['Linear Regression'].status == 'success' and predictions['Linear Regression'].predictions %}
+                                            {% set base_price = predictions['Linear Regression'].predictions[0].price %}
+                                            {% set change = 10.0 %}
+                                            {% if predictions.overall_signal == 'buy' %}
+                                                {% set change = 12.0 %}
+                                            {% elif predictions.overall_signal == 'sell' %}
+                                                {% set change = -8.0 %}
+                                            {% else %}
+                                                {% set change = 2.5 %}
+                                            {% endif %}
+                                            {% set price = base_price * (1 + change / 100) %}
+                                            <h4 class="mb-0">
+                                                {% if is_indian_stock %}
+                                                    ₹{{ price|round(2) }}
+                                                {% else %}
+                                                    ${{ (price / 83.5)|round(2) }}
+                                                    <small class="text-muted fs-6">(₹{{ price|round(2) }})</small>
+                                                {% endif %}
+                                            </h4>
+                                            <span class="badge {% if change > 0 %}bg-success{% elif change < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                {% if change > 0 %}+{% endif %}{{ change|round(2) }}%
+                                            </span>
+                                        {% else %}
+                                            <h4 class="mb-0">--</h4>
+                                            <span class="badge bg-secondary">0.00%</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No prediction data available for {{ symbol }}. Try another stock symbol.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Prediction Models Section -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Price Predictions</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="predictionChart" data-symbol="{{ symbol }}"></canvas>
+                    <input type="hidden" id="predictionData" value='{{ predictions|default({})|tojson }}'>
+                </div>
+                <!-- Debug info removed -->
+                
+                <div class="row mt-4">
+                    <!-- Combined Model Analysis - New Section -->
+                    <div class="col-12 mb-4">
+                        <div class="card shadow-sm border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Combined Model Analysis</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h4 class="fw-bold text-primary">Combined Price Prediction</h4>
+                                        {% set has_predictions = 'Linear Regression' in predictions or 'ARIMA' in predictions or 'LSTM' in predictions %}
+                                        {% if has_predictions %}
+                                            {% set price_sum = 0 %}
+                                            {% set confidence_sum = 0 %}
+                                            {% set model_count = 0 %}
+                                            {% set last_date = '' %}
+                                            
+                                            {% if 'Linear Regression' in predictions and predictions['Linear Regression'] is defined and predictions['Linear Regression'].status is defined and predictions['Linear Regression'].status == 'success' and predictions['Linear Regression'].predictions is defined and predictions['Linear Regression'].predictions|length > 0 %}
+    {% set model_count = model_count + 1 %}
+    {% set price_sum = price_sum + predictions['Linear Regression'].predictions[-1].price %}
+    {% set confidence_sum = confidence_sum + predictions['Linear Regression'].confidence %}
+    {% set last_date = predictions['Linear Regression'].predictions[-1].date %}
+{% endif %}
+                                            
+                                            {% if 'ARIMA' in predictions and predictions['ARIMA'] is defined and predictions['ARIMA'].status is defined and predictions['ARIMA'].status == 'success' and predictions['ARIMA'].predictions is defined and predictions['ARIMA'].predictions|length > 0 %}
+    {% set model_count = model_count + 1 %}
+    {% set price_sum = price_sum + predictions['ARIMA'].predictions[-1].price %}
+    {% set confidence_sum = confidence_sum + predictions['ARIMA'].confidence %}
+    {% set last_date = predictions['ARIMA'].predictions[-1].date %}
+{% endif %}
+                                            
+                                            {% if 'LSTM' in predictions and predictions['LSTM'] is defined and predictions['LSTM'].status is defined and predictions['LSTM'].status == 'success' and predictions['LSTM'].predictions is defined and predictions['LSTM'].predictions|length > 0 %}
+    {% set model_count = model_count + 1 %}
+    {% set price_sum = price_sum + predictions['LSTM'].predictions[-1].price %}
+    {% set confidence_sum = confidence_sum + predictions['LSTM'].confidence %}
+    {% set last_date = predictions['LSTM'].predictions[-1].date %}
+{% endif %}
+                                            
+                                            {% set avg_price = price_sum / model_count if model_count > 0 else 0 %}
+                                            {% set avg_confidence = confidence_sum / model_count if model_count > 0 else 0 %}
+                                            
+                                            <h2 class="display-4 font-weight-bold text-dark">
+    <span class="text-success">
+        {% if is_indian_stock %}
+            ₹{{ '{:,.2f}'.format(avg_price) if avg_price else '0.00' }}
+        {% else %}
+            ${{ '{:,.2f}'.format(avg_price / 83.5) if avg_price else '0.00' }}
+            <small class="text-muted fs-6">(₹{{ '{:,.2f}'.format(avg_price) if avg_price else '0.00' }})</small>
+        {% endif %}
+    </span>
+</h2>
+                                            <p class="text-muted">Prediction for {{ last_date }}, based on {{ model_count }} model{% if model_count != 1 %}s{% endif %}</p>
+                                            
+                                            <div class="d-flex align-items-center mt-3">
+                                                <div class="me-3">Confidence:</div>
+                                                <div class="progress flex-grow-1" style="height: 20px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ (avg_confidence * 100)|round if avg_confidence else 0 }}%; background-color: {{ '#28a745' if avg_confidence > 0.7 else ('#ffc107' if avg_confidence > 0.5 else '#dc3545') }}; color: white;" aria-valuenow="{{ (avg_confidence * 100)|round if avg_confidence else 0 }}" aria-valuemin="0" aria-valuemax="100">{{ (avg_confidence * 100)|round if avg_confidence else 0 }}%</div>
+                                                </div>
+                                            </div>
+                                            
+                                        {% else %}
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                No prediction data available. Please try a different stock symbol or check back later.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4 border-start">
+                                        <h4 class="fw-bold">Add to Portfolio</h4>
+                                        <p>Want to track or invest in {{ symbol }}?</p>
+                                        <form action="{{ url_for('portfolio.add_stock') }}" method="POST" class="mt-3">
+                                            <input type="hidden" name="symbol" value="{{ symbol }}">
+                                            <div class="mb-3">
+                                                <label for="quantity" class="form-label">Quantity</label>
+                                                <input type="number" class="form-control" id="quantity" name="quantity" min="0.01" step="0.01" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="purchase_price" class="form-label">Purchase Price {% if is_indian_stock %}(₹){% else %}(₹/converted from $){% endif %}</label>
+                                                <input type="number" class="form-control" id="purchase_price" name="purchase_price" min="0.01" step="0.01" value="{% if has_predictions and avg_price %}{% if is_indian_stock %}{{ avg_price|round(2) }}{% else %}{{ (avg_price)|round(2) }}{% endif %}{% endif %}" required>
+                                                <!-- Add hidden field to indicate if price is already converted -->
+                                                <input type="hidden" id="price_already_converted" name="price_already_converted" value="{% if not is_indian_stock %}true{% else %}false{% endif %}">
+                                            </div>
+                                            <button type="submit" class="btn btn-success w-100">
+                                                <i class="fas fa-plus-circle me-2"></i>Add to Portfolio
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Individual Model Cards -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title font-weight-bold">Linear Regression</h5>
+                                {% if 'Linear Regression' in predictions %}
+                                    {% set lr = predictions['Linear Regression'] %}
+                                    {% if lr.predictions and lr.predictions|length > 0 %}
+                                        {% set lr_last = lr.predictions[-1] %}
+                                        <h3 class="card-text font-weight-bold">
+                                            {% if is_indian_stock %}
+                                                ₹{{ lr_last.price|round(2) }}
+                                            {% else %}
+                                                ${{ (lr_last.price / 83.5)|round(2) }}
+                                                <small class="text-muted fs-6">(₹{{ lr_last.price|round(2) }})</small>
+                                            {% endif %}
+                                        </h3>
+                                        <p class="card-text text-muted">{{ lr_last.date }}</p>
+                                    {% else %}
+                                        <h3 class="card-text font-weight-bold">{{ "₹" if is_indian_stock else "$" }}0.00</h3>
+                                        <p class="card-text text-muted">No prediction available</p>
+                                    {% endif %}
+                                    <p class="card-text">
+                                        Confidence: <span class="badge" style="background-color: {{ '#28a745' if lr.confidence > 0.7 else ('#ffc107' if lr.confidence > 0.5 else '#dc3545') }}; color: white;">
+                                            {{ (lr.confidence * 100)|round(1) }}%
+                                        </span>
+                                    </p>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        No prediction available
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title font-weight-bold">ARIMA</h5>
+                                {% if 'ARIMA' in predictions %}
+                                    {% set arima = predictions['ARIMA'] %}
+                                    {% if arima.predictions and arima.predictions|length > 0 %}
+                                        {% set arima_last = arima.predictions[-1] %}
+                                        <h3 class="card-text font-weight-bold">
+                                            {% if is_indian_stock %}
+                                                ₹{{ arima_last.price|round(2) }}
+                                            {% else %}
+                                                ${{ (arima_last.price / 83.5)|round(2) }}
+                                                <small class="text-muted fs-6">(₹{{ arima_last.price|round(2) }})</small>
+                                            {% endif %}
+                                        </h3>
+                                        <p class="card-text text-muted">{{ arima_last.date }}</p>
+                                    {% else %}
+                                        <h3 class="card-text font-weight-bold">{{ '₹' if is_indian_stock else '$' }}0.00</h3>
+                                        <p class="card-text text-muted">No prediction available</p>
+                                    {% endif %}
+                                    <p class="card-text">
+                                        Confidence: <span class="badge" style="background-color: {{ '#28a745' if arima.confidence > 0.7 else ('#ffc107' if arima.confidence > 0.5 else '#dc3545') }}; color: white;">
+                                            {{ (arima.confidence * 100)|round(1) }}%
+                                        </span>
+                                    </p>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        No prediction available
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h5 class="card-title font-weight-bold">LSTM</h5>
+                                {% if 'LSTM' in predictions %}
+                                    {% set lstm = predictions['LSTM'] %}
+                                    {% if lstm.predictions and lstm.predictions|length > 0 %}
+                                        {% set lstm_last = lstm.predictions[-1] %}
+                                        <h3 class="card-text font-weight-bold">
+                                            {% if is_indian_stock %}
+                                                ₹{{ lstm_last.price|round(2) }}
+                                            {% else %}
+                                                ${{ (lstm_last.price / 83.5)|round(2) }}
+                                                <small class="text-muted fs-6">(₹{{ lstm_last.price|round(2) }})</small>
+                                            {% endif %}
+                                        </h3>
+                                        <p class="card-text text-muted">{{ lstm_last.date }}</p>
+                                    {% else %}
+                                        <h3 class="card-text font-weight-bold">{{ '₹' if is_indian_stock else '$' }}0.00</h3>
+                                        <p class="card-text text-muted">No prediction available</p>
+                                    {% endif %}
+                                    <p class="card-text">
+                                        Confidence: <span class="badge" style="background-color: {{ '#28a745' if lstm.confidence > 0.7 else ('#ffc107' if lstm.confidence > 0.5 else '#dc3545') }}; color: white;">
+                                            {{ (lstm.confidence * 100)|round(1) }}%
+                                        </span>
+                                    </p>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        No prediction available
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    These predictions are based on historical data analysis and should not be considered as financial advice.
+                    Always conduct your own research before making investment decisions.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sentiment Analysis Summary -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Twitter Sentiment Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="sentiment-card">
+                            <i class="fas fa-smile sentiment-icon sentiment-positive"></i>
+                            <div class="sentiment-label">Positive</div>
+                            <div class="sentiment-score">{{ sentiment.positive_count }} tweets</div>
+                            {% set positive_percent = (sentiment.positive_count / sentiment.total_tweets * 100)|round if sentiment.total_tweets else 0 %}
+                            <div class="progress mt-2">
+                                <div class="progress-bar" role="progressbar" style="width: {{ positive_percent }}%; background-color: #28a745; color: white;" aria-valuenow="{{ positive_percent }}" aria-valuemin="0" aria-valuemax="100">{{ positive_percent }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="sentiment-card">
+                            <i class="fas fa-meh sentiment-icon sentiment-neutral"></i>
+                            <div class="sentiment-label">Neutral</div>
+                            <div class="sentiment-score">{{ sentiment.neutral_count }} tweets</div>
+                            {% set neutral_percent = (sentiment.neutral_count / sentiment.total_tweets * 100)|round if sentiment.total_tweets else 0 %}
+                            <div class="progress mt-2">
+                                <div class="progress-bar" role="progressbar" style="width: {{ neutral_percent }}%; background-color: #ffc107; color: black;" aria-valuenow="{{ neutral_percent }}" aria-valuemin="0" aria-valuemax="100">{{ neutral_percent }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="sentiment-card">
+                            <i class="fas fa-frown sentiment-icon sentiment-negative"></i>
+                            <div class="sentiment-label">Negative</div>
+                            <div class="sentiment-score">{{ sentiment.negative_count }} tweets</div>
+                            {% set negative_percent = (sentiment.negative_count / sentiment.total_tweets * 100)|round if sentiment.total_tweets else 0 %}
+                            <div class="progress mt-2">
+                                <div class="progress-bar" role="progressbar" style="width: {{ negative_percent }}%; background-color: #dc3545; color: white;" aria-valuenow="{{ negative_percent }}" aria-valuemin="0" aria-valuemax="100">{{ negative_percent }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <h5>Overall Sentiment: 
+                        <span class="badge" style="background-color: {{ '#28a745' if sentiment.overall_sentiment == 'positive' else ('#dc3545' if sentiment.overall_sentiment == 'negative' else '#ffc107') }}; color: {{ 'white' if sentiment.overall_sentiment != 'neutral' else 'black' }};">
+                            {{ sentiment.overall_sentiment|title }}
+                        </span>
+                    </h5>
+                    <p>Based on the analysis of {{ sentiment.total_tweets }} tweets about {{ symbol }} on {{ sentiment.date }}</p>
+                    <a href="{{ url_for('main.sentiment', symbol=symbol) }}" class="btn btn-primary mt-2">View Detailed Sentiment Analysis</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<!-- Include Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Pass chart data to JavaScript -->
+<script>
+    // Make chart data available to our scripts
+    window.chartData = {{ chart_data|tojson|safe }};
+    
+    // Set data attribute for currency detection
+    document.body.setAttribute('data-is-indian-stock', '{{ is_indian_stock|lower }}');
+</script>
+
+<!-- Include our historical price chart script -->
+<script src="{{ url_for('static', filename='js/historical-price-chart.js') }}"></script>
+
+<!-- Include prediction chart script -->
+<script src="{{ url_for('static', filename='js/prediction-chart.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Stock info is now rendered directly in the template
+    console.log('Stock info loaded from server-side data');
+    
+    // Let charts.js handle prediction chart initialization
+    // This initialization is done by the initPredictionChart() function in charts.js
+    
+    // Explicitly initialize the modals
+    const buyStockModalEl = document.getElementById('buyStockModal');
+    const sellStockModalEl = document.getElementById('sellStockModal');
+    
+    if (buyStockModalEl) {
+        const buyStockModal = new bootstrap.Modal(buyStockModalEl);
+        
+        // Add click event to buy button
+        const buyButton = document.querySelector('[data-bs-target="#buyStockModal"]');
+        if (buyButton) {
+            buyButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                buyStockModal.show();
+            });
+        }
+    }
+    
+    if (sellStockModalEl) {
+        const sellStockModal = new bootstrap.Modal(sellStockModalEl);
+        
+        // Add click event to sell button
+        const sellButton = document.querySelector('[data-bs-target="#sellStockModal"]');
+        if (sellButton) {
+            sellButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                sellStockModal.show();
+            });
+        }
+        
+        // Handle sell stock modal content
+        sellStockModalEl.addEventListener('show.bs.modal', function() {
+            const sellStockLoading = document.getElementById('sellStockLoading');
+            const sellStockContent = document.getElementById('sellStockContent');
+            const sellStockNotFound = document.getElementById('sellStockNotFound');
+            
+            // Show loading
+            if (sellStockLoading) sellStockLoading.classList.remove('d-none');
+            if (sellStockContent) sellStockContent.classList.add('d-none');
+            if (sellStockNotFound) sellStockNotFound.classList.add('d-none');
+            
+            // Check if user has this stock in portfolio
+            fetch(`/api/portfolio/check?symbol={{ symbol }}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading
+                    if (sellStockLoading) sellStockLoading.classList.add('d-none');
+                    
+                    if (data.success && data.has_stock) {
+                        // User has stock, show sell form
+                        if (sellStockContent) {
+                            sellStockContent.classList.remove('d-none');
+                            sellStockContent.innerHTML = `
+                                <form action="/portfolio/sell/${data.portfolio_item.id}" method="POST">
+                                    <div class="mb-3">
+                                        <label class="form-label">Current Holdings</label>
+                                        <div class="alert alert-info">
+                                            <p class="mb-1"><strong>Shares:</strong> ${data.portfolio_item.quantity}</p>
+                                            <p class="mb-1"><strong>Purchase Price:</strong> ${data.portfolio_item.purchase_price_formatted}</p>
+                                            <p class="mb-0"><strong>Current Value:</strong> ${data.portfolio_item.current_value_formatted}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="quantity" class="form-label">Quantity to Sell</label>
+                                        <input type="number" class="form-control" id="sell_quantity" name="quantity" 
+                                               min="1" max="${data.portfolio_item.quantity}" step="1" value="1" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="sell_price" class="form-label">Sell Price ({{ "₹" if is_indian_stock else "$" }})</label>
+                                        <input type="number" class="form-control" id="sell_price" name="sell_price" 
+                                               min="0.01" step="0.01" value="${data.portfolio_item.current_price}" required>
+                                    </div>
+                                    
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-danger">Sell Stock</button>
+                                    </div>
+                                </form>
+                            `;
+                        }
+                    } else {
+                        // User doesn't have this stock
+                        if (sellStockNotFound) sellStockNotFound.classList.remove('d-none');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking portfolio:', error);
+                    // Hide loading, show error
+                    if (sellStockLoading) sellStockLoading.classList.add('d-none');
+                    if (sellStockContent) {
+                        sellStockContent.classList.remove('d-none');
+                        sellStockContent.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <span>Error checking your portfolio. Please try again later.</span>
+                            </div>
+                        `;
+                    }
+                });
+        });
+    }
+});
+</script>
+{% endblock %}
+
+<!-- Buy and Sell modals have been removed as requested -->

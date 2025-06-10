@@ -1,0 +1,349 @@
+{% extends "layout.html" %}
+
+{% block title %}Sell Stock - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-dollar-sign me-2"></i>Sell Stock</h1>
+    <a href="{{ url_for('portfolio.index') }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-1"></i> Back to Portfolio
+    </a>
+</div>
+
+<div id="alertContainer"></div>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Sell {{ portfolio_item.stock_symbol }} Shares</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">You currently own <strong>{{ portfolio_item.quantity }}</strong> shares of <strong>{{ portfolio_item.stock_symbol }}</strong> at an average purchase price of <strong>₹{{ "%.2f"|format(portfolio_item.purchase_price) }}</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="sellStockForm" method="POST" action="{{ url_for('portfolio.sell_stock', item_id=portfolio_item.id) }}" data-max-quantity="{{ portfolio_item.quantity }}" data-purchase-price="{{ portfolio_item.purchase_price }}" data-current-price="{{ current_price }}">
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Quantity to Sell <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" 
+                               placeholder="Number of shares to sell" min="0.01" step="0.01" max="{{ portfolio_item.quantity }}" required>
+                        <div class="form-text">Enter the number of shares you want to sell (maximum: {{ portfolio_item.quantity }}).</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="sell_price" class="form-label">Selling Price (₹) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" id="sell_price" name="sell_price" 
+                                   placeholder="Price per share" min="0.01" step="0.01" value="{{ "%.2f"|format(current_price) }}" required>
+                        </div>
+                        <div class="form-text">Enter the price per share at which you are selling the stock.</div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title">Transaction Summary</h6>
+                            <div class="row mb-2">
+                                <div class="col-6">Quantity:</div>
+                                <div class="col-6 text-end" id="summary-quantity">0</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6">Price per Share:</div>
+                                <div class="col-6 text-end" id="summary-price">₹0.00</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6">Total Sale Value:</div>
+                                <div class="col-6 text-end fw-bold" id="summary-total">₹0.00</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">Estimated Profit/Loss:</div>
+                                <div class="col-6 text-end fw-bold" id="summary-profit">₹0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="confirmSell" required>
+                        <label class="form-check-label" for="confirmSell">
+                            I confirm that I want to sell these shares.
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-dollar-sign me-1"></i> Sell Shares
+                        </button>
+                        <a href="{{ url_for('portfolio.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">{{ portfolio_item.stock_symbol }} Current Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <h3 class="me-2">₹{{ "%.2f"|format(current_price) }}</h3>
+                    <span id="price-change" class="badge bg-{{ 'success' if current_price >= portfolio_item.purchase_price else 'danger' }}">
+                        {% if current_price >= portfolio_item.purchase_price %}
+                            <i class="fas fa-arrow-up me-1"></i> +{{ "%.2f"|format((current_price - portfolio_item.purchase_price) / portfolio_item.purchase_price * 100) }}%
+                        {% else %}
+                            <i class="fas fa-arrow-down me-1"></i> {{ "%.2f"|format((current_price - portfolio_item.purchase_price) / portfolio_item.purchase_price * 100) }}%
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <h6 class="card-title">Your Position</h6>
+                                <p class="card-text mb-0">
+                                    <strong>Shares:</strong> {{ portfolio_item.quantity }}<br>
+                                    <strong>Avg Price:</strong> ₹{{ "%.2f"|format(portfolio_item.purchase_price) }}<br>
+                                    <strong>Cost Basis:</strong> ₹{{ "%.2f"|format(portfolio_item.quantity * portfolio_item.purchase_price) }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <h6 class="card-title">Current Value</h6>
+                                <p class="card-text mb-0">
+                                    <strong>Current Price:</strong> ₹{{ "%.2f"|format(current_price) }}<br>
+                                    <strong>Market Value:</strong> ₹{{ "%.2f"|format(portfolio_item.quantity * current_price) }}<br>
+                                    <strong>P/L:</strong> <span class="text-{{ 'success' if (portfolio_item.quantity * current_price - portfolio_item.quantity * portfolio_item.purchase_price) >= 0 else 'danger' }}">
+                                        ₹{{ "%.2f"|format(portfolio_item.quantity * current_price - portfolio_item.quantity * portfolio_item.purchase_price) }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <a href="{{ url_for('main.prediction', symbol=portfolio_item.stock_symbol) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-chart-line me-1"></i> View Prediction
+                    </a>
+                    <a href="{{ url_for('main.sentiment', symbol=portfolio_item.stock_symbol) }}" class="btn btn-sm btn-outline-secondary ms-2">
+                        <i class="fas fa-comments me-1"></i> View Sentiment
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-success ms-2" id="refreshPriceBtn">
+                        <i class="fas fa-sync-alt me-1"></i> Refresh Price
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Selling Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        <strong>Consider trends:</strong> Look at recent price movements and predictions before selling.
+                    </li>
+                    <li class="list-group-item px-0">
+                        <i class="fas fa-comments text-primary me-2"></i>
+                        <strong>Check sentiment:</strong> Market sentiment can indicate short-term price movements.
+                    </li>
+                    <li class="list-group-item px-0">
+                        <i class="fas fa-percentage text-primary me-2"></i>
+                        <strong>Partial selling:</strong> Consider selling only a portion of your shares to reduce risk.
+                    </li>
+                    <li class="list-group-item px-0">
+                        <i class="fas fa-hand-holding-usd text-primary me-2"></i>
+                        <strong>Tax implications:</strong> Remember that selling stocks may have tax consequences.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('quantity');
+    const priceInput = document.getElementById('sell_price');
+    const summaryQuantity = document.getElementById('summary-quantity');
+    const summaryPrice = document.getElementById('summary-price');
+    const summaryTotal = document.getElementById('summary-total');
+    const summaryProfit = document.getElementById('summary-profit');
+    const refreshPriceBtn = document.getElementById('refreshPriceBtn');
+    
+    // Purchase price and current price - using data attributes to avoid JS errors
+    const purchasePrice = parseFloat(document.getElementById('sellStockForm').getAttribute('data-purchase-price'));
+    let currentPrice = parseFloat(document.getElementById('sellStockForm').getAttribute('data-current-price'));
+    
+    // Update summary based on form inputs
+    function updateSummary() {
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        const total = quantity * price;
+        const profit = total - (quantity * purchasePrice);
+        
+        document.getElementById('summary-quantity').textContent = quantity.toFixed(2);
+        document.getElementById('summary-price').textContent = '₹' + price.toFixed(2);
+        document.getElementById('summary-total').textContent = '₹' + total.toFixed(2);
+        
+        const profitElement = document.getElementById('summary-profit');
+        profitElement.textContent = '₹' + profit.toFixed(2);
+        profitElement.className = profit >= 0 ? 'col-6 text-end fw-bold text-success' : 'col-6 text-end fw-bold text-danger';
+    }
+    
+    // Update summary on input change
+    quantityInput.addEventListener('input', updateSummary);
+    priceInput.addEventListener('input', updateSummary);
+    
+    // Refresh current price
+    refreshPriceBtn.addEventListener('click', function() {
+        refreshPriceBtn.disabled = true;
+        refreshPriceBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Refreshing...';
+        
+        fetch(`/api/stock-data/{{ portfolio_item.stock_symbol }}?period=1d`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showAlert(`Error: ${data.error}`, 'danger');
+                    return;
+                }
+                
+                if (data.prices && data.prices.length > 0) {
+                    // Update current price
+                    currentPrice = data.prices[data.prices.length - 1];
+                    
+                    // Update price input
+                    priceInput.value = currentPrice.toFixed(2);
+                    
+                    // Update displayed price
+                    document.querySelector('h3').textContent = '₹' + currentPrice.toFixed(2);
+                    
+                    // Update price change
+                    const priceChange = document.getElementById('price-change');
+                    const percentChange = (currentPrice - purchasePrice) / purchasePrice * 100;
+                    
+                    if (percentChange >= 0) {
+                        priceChange.className = 'badge bg-success';
+                        priceChange.innerHTML = `<i class="fas fa-arrow-up me-1"></i> +${percentChange.toFixed(2)}%`;
+                    } else {
+                        priceChange.className = 'badge bg-danger';
+                        priceChange.innerHTML = `<i class="fas fa-arrow-down me-1"></i> ${percentChange.toFixed(2)}%`;
+                    }
+                    
+                    // Update market value
+                    const marketQuantity = parseFloat(document.getElementById('sellStockForm').getAttribute('data-max-quantity'));
+                    const marketValue = marketQuantity * currentPrice;
+                    const costBasis = marketQuantity * purchasePrice;
+                    const totalPL = marketValue - costBasis;
+                    
+                    // Update price displays with Indian Rupee symbol
+                    const priceElements = document.querySelectorAll('strong');
+                    priceElements.forEach(el => {
+                        if (el.textContent === 'Current Price:') {
+                            el.nextSibling.textContent = ' ₹' + currentPrice.toFixed(2);
+                        } else if (el.textContent === 'Market Value:') {
+                            el.nextSibling.textContent = ' ₹' + marketValue.toFixed(2);
+                        } else if (el.textContent === 'P/L:') {
+                            const plElement = el.nextSibling;
+                            plElement.textContent = ` ₹${totalPL.toFixed(2)}`;
+                            plElement.className = totalPL >= 0 ? 'text-success' : 'text-danger';
+                        }
+                    });
+                    
+                    // Update summary
+                    updateSummary();
+                    
+                    showAlert('Price refreshed successfully!', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error refreshing price:', error);
+                showAlert('Error refreshing price. Please try again.', 'danger');
+            })
+            .finally(() => {
+                refreshPriceBtn.disabled = false;
+                refreshPriceBtn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Refresh Price';
+            });
+    });
+    
+    // Form validation
+    document.getElementById('sellStockForm').addEventListener('submit', function(e) {
+        const quantity = parseFloat(quantityInput.value);
+        const maxQuantity = parseFloat(this.dataset.maxQuantity);
+        const price = parseFloat(priceInput.value);
+        
+        if (isNaN(quantity) || quantity <= 0) {
+            e.preventDefault();
+            showAlert('Please enter a valid quantity (must be greater than 0)', 'warning');
+            return;
+        }
+        
+        if (quantity > maxQuantity) {
+            e.preventDefault();
+            showAlert(`You can only sell up to ${maxQuantity} shares`, 'warning');
+            return;
+        }
+        
+        if (isNaN(price) || price <= 0) {
+            e.preventDefault();
+            showAlert('Please enter a valid selling price (must be greater than 0)', 'warning');
+            return;
+        }
+        
+        if (!document.getElementById('confirmSell').checked) {
+            e.preventDefault();
+            showAlert('Please confirm that you want to sell these shares', 'warning');
+            return;
+        }
+    });
+    
+    // Initialize summary
+    updateSummary();
+});
+
+// Show alert message
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    if (!alertContainer) return;
+    
+    const alertElement = document.createElement('div');
+    alertElement.className = `alert alert-${type} alert-dismissible fade show`;
+    alertElement.setAttribute('role', 'alert');
+    
+    alertElement.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    alertContainer.innerHTML = '';
+    alertContainer.appendChild(alertElement);
+    
+    // Automatically remove after 5 seconds
+    setTimeout(() => {
+        alertElement.classList.remove('show');
+        setTimeout(() => {
+            if (alertContainer.contains(alertElement)) {
+                alertContainer.removeChild(alertElement);
+            }
+        }, 150);
+    }, 5000);
+}
+</script>
+{% endblock %}

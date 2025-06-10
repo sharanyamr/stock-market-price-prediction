@@ -1,0 +1,396 @@
+{% extends "layout.html" %}
+
+{% block title %}Sentiment Analysis - {{ symbol }} - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-comments me-2"></i>Sentiment Analysis</h1>
+    <form method="GET" action="{{ url_for('main.sentiment') }}" class="d-flex">
+        <div class="input-group">
+            <input type="text" class="form-control" name="symbol" placeholder="Enter stock symbol" value="{{ symbol }}" required>
+            <button class="btn btn-primary" type="submit">Analyze</button>
+        </div>
+    </form>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">{{ symbol }} Twitter Sentiment Analysis</h5>
+            </div>
+            <div class="card-body">
+                {% if sentiment_data.error or sentiment_data.error_message %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% if sentiment_data.error %}
+                            {{ sentiment_data.error }}
+                        {% else %}
+                            {{ sentiment_data.error_message }}
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="chart-container" style="height: 240px;">
+                                <canvas id="sentimentChart" 
+                                    data-positive="{{ sentiment_data.positive_count }}" 
+                                    data-negative="{{ sentiment_data.negative_count }}" 
+                                    data-neutral="{{ sentiment_data.neutral_count }}">
+                                </canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="h-100 d-flex flex-column justify-content-center">
+                                <h4 class="text-center mb-3">Overall Sentiment</h4>
+                                <div class="text-center">
+                                    {% if sentiment_data.overall_sentiment == 'positive' %}
+                                        <i class="fas fa-smile fa-5x text-success mb-3"></i>
+                                        <h3 class="text-success">Positive</h3>
+                                    {% elif sentiment_data.overall_sentiment == 'negative' %}
+                                        <i class="fas fa-frown fa-5x text-danger mb-3"></i>
+                                        <h3 class="text-danger">Negative</h3>
+                                    {% else %}
+                                        <i class="fas fa-meh fa-5x text-warning mb-3"></i>
+                                        <h3 class="text-warning">Neutral</h3>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h5>Recent Tweets</h5>
+                                    {% if sentiment_data.recent_tweets %}
+                                    <div class="list-group">
+                                        {% for tweet in sentiment_data.recent_tweets %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <p class="mb-1">{{ tweet.text }}</p>
+                                                <small class="text-muted">
+                                                    {% if tweet.sentiment == 'positive' %}
+                                                    <span class="badge bg-success">Positive</span>
+                                                    {% elif tweet.sentiment == 'negative' %}
+                                                    <span class="badge bg-danger">Negative</span>
+                                                    {% else %}
+                                                    <span class="badge bg-warning">Neutral</span>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        No recent tweets found for this stock.
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if sentiment_data.error_message %}
+                                <div class="alert alert-warning mt-3">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <small>{{ sentiment_data.error_message }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-4 text-center">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <i class="fas fa-smile sentiment-icon sentiment-positive"></i>
+                                    <h5>Positive</h5>
+                                    <h3>{{ sentiment_data.positive_count }}</h3>
+                                    <p class="text-muted">
+                                        {{ "%.1f"|format(sentiment_data.positive_count / sentiment_data.total_tweets * 100) if sentiment_data.total_tweets else 0 }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <i class="fas fa-meh sentiment-icon sentiment-neutral"></i>
+                                    <h5>Neutral</h5>
+                                    <h3>{{ sentiment_data.neutral_count }}</h3>
+                                    <p class="text-muted">
+                                        {{ "%.1f"|format(sentiment_data.neutral_count / sentiment_data.total_tweets * 100) if sentiment_data.total_tweets else 0 }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <i class="fas fa-frown sentiment-icon sentiment-negative"></i>
+                                    <h5>Negative</h5>
+                                    <h3>{{ sentiment_data.negative_count }}</h3>
+                                    <p class="text-muted">
+                                        {{ "%.1f"|format(sentiment_data.negative_count / sentiment_data.total_tweets * 100) if sentiment_data.total_tweets else 0 }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        This analysis is based on {{ sentiment_data.total_tweets }} tweets from {{ sentiment_data.date }}. The sentiment is determined using natural language processing to analyze the content of tweets mentioning {{ symbol }}.
+                    </div>
+                    
+                    <!-- Tweet Examples Section -->
+                    {% if sentiment_data.recent_tweets and sentiment_data.recent_tweets|length > 0 %}
+                    <div class="mt-4">
+                        <h5 class="mb-3"><i class="fab fa-twitter text-info me-2"></i>Recent Tweets About {{ symbol }}</h5>
+                        <div class="tweet-examples">
+                            {% for tweet in sentiment_data.recent_tweets %}
+                            <div class="card mb-3 tweet-card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex">
+                                            <div class="tweet-avatar me-3">
+                                                <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="tweet-user">Twitter User</div>
+                                                <div class="tweet-date text-muted"><small>{{ sentiment_data.date }}</small></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="badge {% if tweet.sentiment == 'positive' %}bg-success{% elif tweet.sentiment == 'negative' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                {{ tweet.sentiment|title }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="tweet-text mt-2">
+                                        {{ tweet.text }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">{{ symbol }} Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('main.prediction', symbol=symbol) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-chart-line me-1"></i> View Price Prediction
+                    </a>
+                    <a href="{{ url_for('portfolio.add_stock') }}?symbol={{ symbol }}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-1"></i> Add to Portfolio
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Investment Recommendations</h5>
+            </div>
+            <div class="card-body">
+                {% if sentiment_data.overall_sentiment == 'positive' %}
+                <div class="alert alert-success">
+                    <i class="fas fa-arrow-up me-2"></i>
+                    <strong>Buy Signal:</strong> Positive sentiment suggests potentially favorable market outlook.
+                </div>
+                {% elif sentiment_data.overall_sentiment == 'negative' %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-arrow-down me-2"></i>
+                    <strong>Sell Signal:</strong> Negative sentiment suggests caution is warranted.
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-arrows-alt-h me-2"></i>
+                    <strong>Hold Signal:</strong> Neutral sentiment suggests market uncertainty.
+                </div>
+                {% endif %}
+                
+                <p class="mb-0">These recommendations are based solely on social media sentiment and should be considered alongside other factors such as:</p>
+                <ul>
+                    <li>Fundamental analysis</li>
+                    <li>Technical indicators</li>
+                    <li>Market conditions</li>
+                    <li>Company news and performance</li>
+                </ul>
+                <div class="small text-muted">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    This is not financial advice. Always conduct your own research.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Comment Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Community Discussion</h5>
+            </div>
+            <div class="card-body">
+                <!-- Alert container for messages -->
+                <div id="alertContainer"></div>
+                
+                <!-- Comment form - Direct form submission -->
+                {% if current_user.is_authenticated %}
+                <form action="/api/sentiment/comments" method="POST" class="mb-4">
+                    <input type="hidden" name="symbol" value="{{ symbol }}">
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Share your thoughts about {{ symbol }}</label>
+                        <textarea class="form-control" name="comment" id="comment" rows="3" placeholder="What do you think about this stock?" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sentiment</label>
+                        <div class="d-flex">
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="sentiment" id="sentimentPositive" value="positive" checked>
+                                <label class="form-check-label" for="sentimentPositive">
+                                    <i class="fas fa-smile text-success"></i> Positive
+                                </label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="sentiment" id="sentimentNeutral" value="neutral">
+                                <label class="form-check-label" for="sentimentNeutral">
+                                    <i class="fas fa-meh text-warning"></i> Neutral
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="sentiment" id="sentimentNegative" value="negative">
+                                <label class="form-check-label" for="sentimentNegative">
+                                    <i class="fas fa-frown text-danger"></i> Negative
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </form>
+                <hr>
+                {% else %}
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <a href="{{ url_for('auth.login') }}">Log in</a> or <a href="{{ url_for('auth.register') }}">register</a> to join the discussion.
+                </div>
+                {% endif %}
+                
+                <!-- Comments list -->
+                <div id="commentsList">
+                    {% if comments %}
+                        {% for comment in comments %}
+                        <div class="comment-container mb-4" data-comment-id="{{ comment.id }}">
+                            <div class="comment">
+                                <div class="comment-header d-flex justify-content-between">
+                                    <span class="comment-username"><i class="fas fa-user-circle me-1"></i> {{ comment.user.username }}</span>
+                                    <span class="comment-timestamp text-muted"><i class="fas fa-clock me-1"></i> {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                </div>
+                                <div class="comment-body my-2">
+                                    {{ comment.comment }}
+                                </div>
+                                <div class="comment-footer">
+                                    <span class="badge bg-{{ 'success' if comment.sentiment == 'positive' else ('danger' if comment.sentiment == 'negative' else 'warning') }}">
+                                        {{ comment.sentiment|upper }}
+                                    </span>
+                                    {% if current_user.is_authenticated %}
+                                    <button class="btn btn-sm btn-outline-primary ms-2 reply-button">
+                                        <i class="fas fa-reply me-1"></i> Reply
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                {% if current_user.is_authenticated %}
+                                <div class="reply-form-container mt-3" style="display: none;">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control reply-input" placeholder="Write a reply...">
+                                        <button class="btn btn-primary submit-reply-btn" data-comment-id="{{ comment.id }}">Reply</button>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="comment-replies ms-4 mt-2">
+                                {% for reply in comment.replies %}
+                                <div class="reply mb-2">
+                                    <div class="reply-header d-flex justify-content-between">
+                                        <span class="reply-username"><i class="fas fa-user-circle me-1"></i> {{ reply.user.username }}</span>
+                                        <span class="reply-timestamp text-muted"><i class="fas fa-clock me-1"></i> {{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                    </div>
+                                    <div class="reply-body my-2">
+                                        {{ reply.reply }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                            <h5>No comments yet</h5>
+                            <p>Be the first to share your thoughts about {{ symbol }}.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sentiment chart
+    const sentimentChartCanvas = document.getElementById('sentimentChart');
+    if (sentimentChartCanvas) {
+        const positiveCount = parseInt(sentimentChartCanvas.dataset.positive) || 0;
+        const negativeCount = parseInt(sentimentChartCanvas.dataset.negative) || 0;
+        const neutralCount = parseInt(sentimentChartCanvas.dataset.neutral) || 0;
+        
+        const ctx = sentimentChartCanvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Positive', 'Neutral', 'Negative'],
+                datasets: [{
+                    data: [positiveCount, neutralCount, negativeCount],
+                    backgroundColor: [
+                        'rgba(76, 175, 80, 0.8)',
+                        'rgba(255, 152, 0, 0.8)',
+                        'rgba(244, 67, 54, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = positiveCount + neutralCount + negativeCount;
+                                const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.raw} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+<!-- Load the dedicated sentiment comments JavaScript file -->
+<script src="{{ url_for('static', filename='js/sentiment-comments.js') }}"></script>
+{% endblock %}

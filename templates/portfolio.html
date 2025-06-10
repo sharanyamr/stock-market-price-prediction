@@ -1,0 +1,303 @@
+{% extends "layout.html" %}
+
+{% block title %}Your Portfolio - StockSage{% endblock %}
+
+{% block additional_head %}
+<script src="{{ url_for('static', filename='js/portfolio.js') }}"></script>
+<script src="{{ url_for('static', filename='js/stock-info.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-briefcase me-2"></i>Your Portfolio</h1>
+    <div>
+        <a href="{{ url_for('portfolio.add_stock') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Add Stock
+        </a>
+        <a href="{{ url_for('portfolio.transactions') }}" class="btn btn-outline-primary ms-2">
+            <i class="fas fa-history me-1"></i> Transactions
+        </a>
+    </div>
+</div>
+
+<div id="alertContainer"></div>
+
+<!-- Portfolio Summary Cards -->
+<div class="row mb-4" id="portfolioSummaryCards">
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 border-0 shadow-sm bg-light">
+            <div class="card-header bg-primary text-white text-center">
+                <h5 class="card-title mb-0">Total Value</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="display-5 mb-2 fw-bold" id="totalValueDisplay">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <p class="card-text">Current market value of all your holdings</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 border-0 shadow-sm bg-light">
+            <div class="card-header bg-info text-white text-center">
+                <h5 class="card-title mb-0">Total Cost</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="display-5 mb-2 fw-bold" id="totalCostDisplay">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <p class="card-text">Total amount invested in your portfolio</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 border-0 shadow-sm bg-light">
+            <div class="card-header bg-secondary text-white text-center" id="profitLossHeader">
+                <h5 class="card-title mb-0">Profit/Loss</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="display-5 mb-2 fw-bold" id="profitLossDisplay">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="fs-5" id="profitLossPercentDisplay">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 border-0 shadow-sm bg-light">
+            <div class="card-header bg-secondary text-white text-center">
+                <h5 class="card-title mb-0">Holdings</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="display-5 mb-2 fw-bold" id="holdingsCountDisplay">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div class="d-grid mt-3">
+                    <a href="{{ url_for('portfolio.add_stock') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus-circle me-1"></i> Add New Stock
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Portfolio Performance Analysis Card -->
+<div class="card shadow-sm mb-4" id="portfolioAnalysisCard" style="display: none;">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Profit/Loss Analysis</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Overall Performance</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <td>Total Investment</td>
+                                        <td class="text-end fw-bold" id="totalInvestmentCell">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Current Value</td>
+                                        <td class="text-end fw-bold" id="currentValueCell">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Profit/Loss</td>
+                                        <td class="text-end fw-bold" id="profitLossCell">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Profit/Loss (%)</td>
+                                        <td class="text-end fw-bold" id="profitLossPercentCell">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-3 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Top Performers</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th class="text-end">Return %</th>
+                                        <th class="text-end">Profit/Loss</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topPerformersTable">
+                                    <!-- Table will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info">
+            <i class="fas fa-lightbulb me-2"></i> <strong>Pro Tip:</strong> Regularly review your portfolio performance and consider rebalancing to optimize returns. Past performance is not indicative of future results.
+        </div>
+    </div>
+</div>
+
+<!-- Portfolio Holdings Table -->
+<div class="card shadow-sm mb-4" id="portfolioHoldingsCard" style="display: none;">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Your Holdings</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="portfolioTable">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Quantity</th>
+                        <th>Purchase Price</th>
+                        <th>Current Price</th>
+                        <th>Cost Basis</th>
+                        <th>Current Value</th>
+                        <th>Profit/Loss</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="portfolioTableBody">
+                    <!-- Table will be populated by JavaScript -->
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading your portfolio data...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Empty Portfolio Message -->
+<div class="alert alert-info" id="emptyPortfolioMessage" style="display: none;">
+    <i class="fas fa-info-circle me-2"></i> You don't have any stocks in your portfolio yet. 
+    <a href="{{ url_for('portfolio.add_stock') }}" class="alert-link">Add your first stock</a> to start tracking your investments.
+</div>
+
+<!-- Portfolio Chart -->
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Portfolio Allocation</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="portfolioSummaryChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> This chart shows the percentage of your portfolio allocated to each stock by current value.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Transactions</h5>
+                    <a href="{{ url_for('portfolio.transactions') }}" class="btn btn-sm btn-light">
+                        <i class="fas fa-list me-1"></i> View All
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Symbol</th>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTransactionsTable">
+                            <!-- Table will be populated by JavaScript -->
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Loading your recent transactions...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="row">
+            <!-- Stock Information Card -->
+            <div class="col-12 mb-4">
+                {% include 'components/stock_info.html' %}
+            </div>
+            
+            <!-- Performance Chart -->
+            <div class="col-12">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Performance by Stock</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height: 300px;">
+                            <canvas id="portfolioPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

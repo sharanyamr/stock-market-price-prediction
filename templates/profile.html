@@ -1,0 +1,206 @@
+{% extends "layout.html" %}
+
+{% block title %}Your Profile - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-circle me-2"></i>Your Profile</h1>
+    <div>
+        <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary">
+            <i class="fas fa-edit me-1"></i> Edit Profile
+        </a>
+        <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-primary ms-2">
+            <i class="fas fa-key me-1"></i> Change Password
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Account Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="avatar-placeholder mb-3">
+                        <i class="fas fa-user-circle fa-6x text-primary"></i>
+                    </div>
+                    <h4>{{ current_user.username }}</h4>
+                    <p class="text-muted">
+                        Member since {{ current_user.created_at.strftime('%B %d, %Y') }}
+                    </p>
+                    {% if current_user.is_admin %}
+                    <span class="badge bg-danger">Administrator</span>
+                    {% endif %}
+                </div>
+                
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0">
+                        <strong><i class="fas fa-envelope me-2"></i>Email:</strong>
+                        <span class="float-end">{{ current_user.email }}</span>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <strong><i class="fas fa-user me-2"></i>Full Name:</strong>
+                        <span class="float-end">
+                            {{ current_user.first_name }} {{ current_user.last_name }}
+                        </span>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <strong><i class="fas fa-clock me-2"></i>Last Login:</strong>
+                        <span class="float-end">
+                            {{ current_user.last_login.strftime('%B %d, %Y at %H:%M') if current_user.last_login else 'N/A' }}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Portfolio Summary</h5>
+            </div>
+            <div class="card-body">
+                {% set portfolio_items = current_user.portfolio_items.all() %}
+                {% if portfolio_items %}
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center py-3">
+                                    <h6 class="card-title">Total Holdings</h6>
+                                    <h3 class="mb-0">{{ portfolio_items|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center py-3">
+                                    <h6 class="card-title">Invested Value</h6>
+                                    {% set total_invested = 0 %}
+                                    {% for item in portfolio_items %}
+                                        {% set total_invested = total_invested + (item.quantity * item.purchase_price) %}
+                                    {% endfor %}
+                                    <h3 class="mb-0">${{ "%.2f"|format(total_invested) }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center py-3">
+                                    <h6 class="card-title">Recent Activity</h6>
+                                    {% set transactions = current_user.portfolio_items.order_by('purchase_date').limit(1).all() %}
+                                    {% if transactions %}
+                                        <p class="mb-0 small">Last purchase: {{ transactions[0].purchase_date.strftime('%B %d, %Y') }}</p>
+                                    {% else %}
+                                        <p class="mb-0 small">No recent activity</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{{ url_for('portfolio.index') }}" class="btn btn-primary">
+                            <i class="fas fa-briefcase me-1"></i> View Full Portfolio
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                        <h5>Your portfolio is empty</h5>
+                        <p>Start building your portfolio by adding stocks.</p>
+                        <a href="{{ url_for('portfolio.add_stock') }}" class="btn btn-primary mt-2">Add Stock</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Recent Activity</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% set comments = current_user.sentiment_comments.order_by('created_at').limit(3).all() %}
+                    {% set transactions = current_user.portfolio_items.order_by('purchase_date').limit(3).all() %}
+                    
+                    {% if comments or transactions %}
+                        {% for comment in comments %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-comment text-primary me-2"></i>
+                                    You commented on {{ comment.stock_symbol }}
+                                </h6>
+                                <small class="text-muted">{{ comment.created_at.strftime('%B %d, %Y') }}</small>
+                            </div>
+                            <p class="mb-1 small">{{ comment.comment[:100] }}{% if comment.comment|length > 100 %}...{% endif %}</p>
+                            <small class="text-muted">Sentiment: <span class="badge bg-{{ 'success' if comment.sentiment == 'positive' else ('danger' if comment.sentiment == 'negative' else 'warning') }}">{{ comment.sentiment|title }}</span></small>
+                        </div>
+                        {% endfor %}
+                        
+                        {% for item in transactions %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-shopping-cart text-primary me-2"></i>
+                                    You purchased {{ item.stock_symbol }}
+                                </h6>
+                                <small class="text-muted">{{ item.purchase_date.strftime('%B %d, %Y') }}</small>
+                            </div>
+                            <p class="mb-1 small">{{ item.quantity }} shares at ${{ "%.2f"|format(item.purchase_price) }} per share</p>
+                            <small class="text-muted">Total: ${{ "%.2f"|format(item.quantity * item.purchase_price) }}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="list-group-item text-center py-4">
+                            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                            <h5>No recent activity</h5>
+                            <p>Your activity history will appear here as you use the platform.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 bg-light">
+            <div class="card-body text-center p-4">
+                <h4 class="mb-4">Account Actions</h4>
+                <div class="row justify-content-center">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-outline-primary btn-lg w-100 py-3">
+                            <i class="fas fa-user-edit fa-2x mb-2"></i><br>
+                            Edit Profile
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-primary btn-lg w-100 py-3">
+                            <i class="fas fa-key fa-2x mb-2"></i><br>
+                            Change Password
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('portfolio.index') }}" class="btn btn-outline-primary btn-lg w-100 py-3">
+                            <i class="fas fa-briefcase fa-2x mb-2"></i><br>
+                            Manage Portfolio
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-lg w-100 py-3">
+                            <i class="fas fa-sign-out-alt fa-2x mb-2"></i><br>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

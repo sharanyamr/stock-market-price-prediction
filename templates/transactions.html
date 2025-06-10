@@ -1,0 +1,294 @@
+{% extends "layout.html" %}
+
+{% block title %}Transaction History - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-history me-2"></i>Transaction History</h1>
+    <a href="{{ url_for('portfolio.index') }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-1"></i> Back to Portfolio
+    </a>
+</div>
+
+<!-- Transactions Table -->
+<div class="card shadow-sm">
+    <div class="card-header bg-transparent">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Your Stock Transactions</h5>
+            <div class="d-flex">
+                <div class="input-group me-2" style="width: 250px;">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search transactions...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-filter me-1"></i> Filter
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="filterDropdown">
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="all">All Transactions</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="buy">Buy Transactions</a></li>
+                        <li><a class="dropdown-item filter-option" href="#" data-filter="sell">Sell Transactions</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Symbol</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total Value</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr data-type="{{ transaction.transaction_type }}">
+                        <td>{{ transaction.transaction_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <strong>{{ transaction.display_symbol if transaction.display_symbol else transaction.stock_symbol }}</strong>
+                            {% if transaction.original_currency == 'USD' %}
+                                <span class="badge bg-primary">NASDAQ</span>
+                            {% else %}
+                                <span class="badge bg-info">NSE/BSE</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if transaction.transaction_type == 'buy' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ transaction.transaction_type|upper }}
+                            </span>
+                        </td>
+                        <td>{{ transaction.quantity }}</td>
+                        <td>
+                            {% if transaction.original_currency == 'USD' %}
+                                {{ transaction.price_formatted }}
+                                <small class="text-muted d-block">({{ transaction.original_price_formatted }})</small>
+                            {% else %}
+                                {{ transaction.price_formatted }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if transaction.original_currency == 'USD' %}
+                                {{ transaction.total_formatted }}
+                                <small class="text-muted d-block">({{ "$%.2f"|format(transaction.original_price * transaction.quantity) }})</small>
+                            {% else %}
+                                {{ transaction.total_formatted }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('main.prediction', symbol=transaction.stock_symbol) }}" class="btn btn-outline-primary" title="View Prediction">
+                                    <i class="fas fa-chart-line"></i>
+                                </a>
+                                <a href="{{ url_for('main.sentiment', symbol=transaction.stock_symbol) }}" class="btn btn-outline-secondary" title="View Sentiment">
+                                    <i class="fas fa-comments"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-history fa-3x text-muted mb-3"></i>
+            <h5>No transaction history</h5>
+            <p>Start building your portfolio by adding stocks.</p>
+            <a href="{{ url_for('portfolio.add_stock') }}" class="btn btn-primary mt-2">Add Stock</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Transaction Summary -->
+{% if transactions %}
+<div class="row mt-4">
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Transactions</h5>
+                <div class="display-5 mb-2" id="totalTransactions">{{ transactions|length }}</div>
+                <p class="card-text text-muted">
+                    <span class="text-success" id="buyCount">{{ transactions|selectattr('transaction_type', 'equalto', 'buy')|list|length }}</span> buys,
+                    <span class="text-danger" id="sellCount">{{ transactions|selectattr('transaction_type', 'equalto', 'sell')|list|length }}</span> sells
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Buy Volume</h5>
+                <div class="display-5 mb-2 text-success">₹{{ "%.2f"|format(total_buy_volume) }}</div>
+                <p class="card-text text-muted">Total amount invested</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Sell Volume</h5>
+                <div class="display-5 mb-2 text-danger">₹{{ "%.2f"|format(total_sell_volume) }}</div>
+                <p class="card-text text-muted">Total amount realized</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Export Options -->
+{% if transactions %}
+<div class="mt-4 text-center">
+    <div class="btn-group">
+        <button type="button" class="btn btn-outline-primary" id="exportCSV">
+            <i class="fas fa-file-csv me-1"></i> Export to CSV
+        </button>
+        <button type="button" class="btn btn-outline-primary" id="printTransactions">
+            <i class="fas fa-print me-1"></i> Print Transactions
+        </button>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const transactionsTable = document.getElementById('transactionsTable');
+    const filterOptions = document.querySelectorAll('.filter-option');
+    
+    // Current filter
+    let currentFilter = 'all';
+    
+    // Search functionality
+    function searchTransactions() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const rows = transactionsTable.querySelectorAll('tbody tr');
+        let visibleCount = 0;
+        let buyCount = 0;
+        let sellCount = 0;
+        
+        rows.forEach(row => {
+            const symbol = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const date = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+            const type = row.dataset.type;
+            
+            // Check if it matches the search term and current filter
+            const matchesSearch = symbol.includes(searchTerm) || date.includes(searchTerm);
+            const matchesFilter = currentFilter === 'all' || type === currentFilter;
+            
+            if (matchesSearch && matchesFilter) {
+                row.style.display = '';
+                visibleCount++;
+                
+                if (type === 'buy') {
+                    buyCount++;
+                } else if (type === 'sell') {
+                    sellCount++;
+                }
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update counters
+        document.getElementById('totalTransactions').textContent = visibleCount;
+        document.getElementById('buyCount').textContent = buyCount;
+        document.getElementById('sellCount').textContent = sellCount;
+    }
+    
+    // Event listeners
+    searchButton.addEventListener('click', searchTransactions);
+    
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            searchTransactions();
+        }
+    });
+    
+    // Filter options
+    filterOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Update current filter
+            currentFilter = this.dataset.filter;
+            
+            // Update active class
+            filterOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update dropdown button text
+            const filterText = this.textContent;
+            document.getElementById('filterDropdown').innerHTML = `<i class="fas fa-filter me-1"></i> ${filterText}`;
+            
+            // Apply filter
+            searchTransactions();
+        });
+    });
+    
+    // Export to CSV
+    document.getElementById('exportCSV').addEventListener('click', function() {
+        // Get visible rows
+        const rows = Array.from(transactionsTable.querySelectorAll('tbody tr'))
+            .filter(row => row.style.display !== 'none');
+        
+        if (rows.length === 0) {
+            alert('No transactions to export');
+            return;
+        }
+        
+        // Create CSV content
+        let csv = 'Date,Symbol,Type,Quantity,Price,Total Value\n';
+        
+        rows.forEach(row => {
+            const columns = Array.from(row.querySelectorAll('td')).slice(0, 6);
+            const rowData = columns.map(col => {
+                // Remove ₹ sign from price and total
+                let text = col.textContent.trim();
+                if (text.startsWith('₹')) {
+                    text = text.substring(1);
+                }
+                // Handle the transaction type (remove the BUY/SELL text)
+                if (col.querySelector('.badge')) {
+                    text = row.dataset.type;
+                }
+                return `"${text}"`;
+            });
+            
+            csv += rowData.join(',') + '\n';
+        });
+        
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `stock_transactions_${new Date().toISOString().slice(0, 10)}.csv`);
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+    
+    // Print transactions
+    document.getElementById('printTransactions').addEventListener('click', function() {
+        window.print();
+    });
+});
+</script>
+{% endblock %}

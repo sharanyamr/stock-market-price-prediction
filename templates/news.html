@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+
+{% block title %}Latest Market News - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-newspaper me-2"></i>Latest Market News</h1>
+    <div>
+        <a href="{{ url_for('main.news', refresh='true') }}" class="btn btn-primary">
+            <i class="fas fa-sync-alt me-1"></i> Refresh News
+        </a>
+        {% if current_user.is_admin %}
+        <form action="{{ url_for('admin.refresh_news') }}" method="POST" class="d-inline ms-2">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="fas fa-cog me-1"></i> Admin Refresh
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<!-- News Header -->
+<div class="row align-items-center mb-5 p-4 bg-light rounded shadow-sm enhanced-header">
+    <div class="col-lg-7">
+        <h2 class="display-4 mb-3">Stay Informed with Market Updates</h2>
+        <p class="lead">Keep up with the latest stock market news, financial updates, and economic indicators to make informed investment decisions.</p>
+        <p class="subtitle">Our news feed is regularly updated with the most relevant information from trusted financial sources.</p>
+        <div class="d-flex flex-wrap mt-4">
+            <div class="me-4 mb-3 feature-box">
+                <h5><i class="fas fa-newspaper me-2"></i> Financial News</h5>
+                <p>The latest updates from the global financial markets.</p>
+            </div>
+            <div class="me-4 mb-3 feature-box">
+                <h5><i class="fas fa-chart-pie me-2"></i> Market Analysis</h5>
+                <p>Expert analysis on market trends and movements.</p>
+            </div>
+            <div class="me-4 mb-3 feature-box">
+                <h5><i class="fas fa-bullhorn me-2"></i> Company Updates</h5>
+                <p>Important announcements from major companies.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <img src="https://images.unsplash.com/photo-1444653614773-995cb1ef9efa" class="img-fluid rounded shadow" alt="Financial News">
+    </div>
+</div>
+
+<!-- News Articles -->
+<div class="row g-4">
+    {% if news_articles.items %}
+        {% for news in news_articles.items %}
+        <div class="col-md-6">
+            <div class="card h-100 shadow hover-shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <span class="badge bg-light text-dark float-end">{{ news.category|default('General') }}</span>
+                    <small><i class="fas fa-calendar-alt me-1"></i> {{ news.published_at.strftime('%b %d, %Y') }}</small>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title mb-3">{{ news.title }}</h4>
+                    <p class="card-text text-muted mb-3">
+                        <i class="fas fa-newspaper me-1"></i> <strong>Source:</strong> {{ news.source }}
+                    </p>
+                    <p class="card-text">{{ news.content[:200] + '...' if news.content|length > 200 else news.content }}</p>
+                </div>
+                <div class="card-footer bg-light text-end">
+                    <a href="{{ news.url }}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt me-1"></i> Read Full Article
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No news articles available at the moment.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if news_articles.pages > 1 %}
+<nav aria-label="News pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if news_articles.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.news', page=news_articles.prev_num) }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for page_num in news_articles.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == news_articles.page %}
+                <li class="page-item active">
+                    <a class="page-link" href="{{ url_for('main.news', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.news', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">...</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if news_articles.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.news', page=news_articles.next_num) }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- Why Stay Informed -->
+<div class="card mt-5 border-0 bg-light">
+    <div class="card-body p-4">
+        <h3 class="mb-4 text-center">Why Stay Informed with Market News</h3>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-bolt fa-2x text-primary"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Real-Time Impact</h5>
+                        <p>News can have an immediate effect on stock prices. Staying informed helps you respond quickly to market changes.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-lightbulb fa-2x text-primary"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Identify Opportunities</h5>
+                        <p>Market news can reveal emerging trends and investment opportunities before they become widely known.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-shield-alt fa-2x text-primary"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5>Manage Risk</h5>
+                        <p>Staying informed about economic indicators and company news helps you anticipate potential risks to your investments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
