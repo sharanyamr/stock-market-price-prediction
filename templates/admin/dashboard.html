@@ -1,0 +1,259 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin Dashboard - StockSage{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
+    <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
+        <i class="fas fa-home me-1"></i> Back to Site
+    </a>
+</div>
+
+<!-- Admin Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body admin-card">
+                <i class="fas fa-users admin-icon"></i>
+                <div class="admin-value">{{ user_count }}</div>
+                <div class="admin-label">Registered Users</div>
+            </div>
+            <div class="card-footer bg-transparent text-center">
+                <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-primary">Manage Users</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body admin-card">
+                <i class="fas fa-graduation-cap admin-icon"></i>
+                <div class="admin-value">{{ article_count }}</div>
+                <div class="admin-label">Education Articles</div>
+            </div>
+            <div class="card-footer bg-transparent text-center">
+                <a href="{{ url_for('admin.articles') }}" class="btn btn-sm btn-outline-primary">Manage Articles</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body admin-card">
+                <i class="fas fa-newspaper admin-icon"></i>
+                <div class="admin-value">{{ news_count }}</div>
+                <div class="admin-label">News Articles</div>
+            </div>
+            <div class="card-footer bg-transparent text-center">
+                <a href="{{ url_for('admin.news') }}" class="btn btn-sm btn-outline-primary">Manage News</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-body admin-card">
+                <i class="fas fa-comments admin-icon"></i>
+                <div class="admin-value">{{ comment_count }}</div>
+                <div class="admin-label">User Comments</div>
+            </div>
+            <div class="card-footer bg-transparent text-center">
+                <a href="{{ url_for('admin.comments') }}" class="btn btn-sm btn-outline-primary">Manage Comments</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Users</h5>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_users %}
+                                {% for user in recent_users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle fa-lg text-muted me-2"></i>
+                                            <span>{{ user.username }}</span>
+                                            {% if user.is_admin %}
+                                            <span class="badge bg-danger ms-2">Admin</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <form action="{{ url_for('admin.toggle_admin', user_id=user.id) }}" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-{{ 'danger' if user.is_admin else 'success' }}">
+                                                {% if user.is_admin %}
+                                                <i class="fas fa-user-minus"></i>
+                                                {% else %}
+                                                <i class="fas fa-user-shield"></i>
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">No users found.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Comments</h5>
+                <a href="{{ url_for('admin.comments') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% if recent_comments %}
+                        {% for comment in recent_comments %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div>
+                                    <strong>{{ comment.user.username }}</strong> on <span class="badge bg-primary">{{ comment.stock_symbol }}</span>
+                                </div>
+                                <small class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1 small">{{ comment.comment[:100] }}{% if comment.comment|length > 100 %}...{% endif %}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-{{ 'success' if comment.sentiment == 'positive' else ('danger' if comment.sentiment == 'negative' else 'warning') }}">
+                                    {{ comment.sentiment|title }}
+                                </span>
+                                <form action="{{ url_for('admin.delete_comment', comment_id=comment.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this comment?');">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="list-group-item text-center py-3">
+                            <p class="mb-0">No comments found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('admin.new_article') }}" class="btn btn-success w-100 py-3">
+                            <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                            Create Article
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <form action="{{ url_for('admin.refresh_news') }}" method="POST">
+                            <button type="submit" class="btn btn-primary w-100 py-3">
+                                <i class="fas fa-sync-alt fa-2x mb-2"></i><br>
+                                Refresh News
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.prediction') }}" class="btn btn-info w-100 py-3 text-white">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i><br>
+                            Test Predictions
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('main.sentiment') }}" class="btn btn-warning w-100 py-3 text-dark">
+                            <i class="fas fa-comments fa-2x mb-2"></i><br>
+                            Test Sentiment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0">System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Database Status</h6>
+                                        <p class="mb-0 small">PostgreSQL</p>
+                                    </div>
+                                    <span class="badge bg-success">Connected</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">yFinance API</h6>
+                                        <p class="mb-0 small">Stock Data</p>
+                                    </div>
+                                    <span class="badge bg-success">Operational</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Twitter API</h6>
+                                        <p class="mb-0 small">Sentiment Analysis</p>
+                                    </div>
+                                    <span class="badge bg-success">Operational</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
