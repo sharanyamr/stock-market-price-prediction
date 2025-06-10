@@ -1,0 +1,571 @@
+:root {
+    --primary-color: #1e88e5;
+    --secondary-color: #26a69a;
+    --positive-color: #4caf50;
+    --negative-color: #f44336;
+    --warn-color: #ff9800;
+    --light-bg: #f8f9fa;
+    --dark-bg: #343a40;
+    --light-text: #f8f9fa;
+    --dark-text: #343a40;
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --hover-bg: #f1f3f5;
+    --border-color: #dee2e6;
+    --chart-primary: rgba(75, 192, 192, 0.8);
+    --chart-secondary: rgba(54, 162, 235, 0.8);
+    --chart-tertiary: rgba(153, 102, 255, 0.8);
+    --chart-quaternary: rgba(255, 159, 64, 0.8);
+    --chart-quinary: rgba(255, 99, 132, 0.8);
+}
+
+/* Base styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: var(--dark-text);
+    background-color: var(--light-bg);
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 16px; /* Base font size */
+}
+
+/* Colorful Navigation Bar for Light Theme */
+#main-navbar {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 0.75rem 0;
+}
+
+#main-navbar .navbar-brand {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+#main-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+#main-navbar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+#main-navbar .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+#main-navbar .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+#main-navbar .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+#main-navbar .dropdown-menu {
+    border: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+#main-navbar .dropdown-item:hover {
+    background-color: rgba(79, 172, 254, 0.1);
+}
+
+/* Theme switch styling to match navbar */
+#main-navbar .theme-switch .slider {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+#main-navbar .theme-switch .slider:before {
+    background-color: white;
+}
+
+#main-navbar .theme-label {
+    color: white;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700; /* Bolder headings for better visibility */
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em; /* Slightly tightened letter spacing */
+    color: var(--dark-text); /* Ensure headings have good contrast */
+}
+
+h1 { font-size: 2.5rem; } /* Increased sizes for better readability */
+h2 { font-size: 2.1rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1.1rem; }
+
+.card-title {
+    font-weight: 700; /* Bolder card titles */
+    margin-bottom: 0.75rem; /* Added spacing below card titles */
+}
+
+/* Improved paragraph and text readability */
+p, li, td, th, .btn, .form-control, .form-label {
+    font-size: 1rem; /* Base font size for text elements */
+    font-weight: 400; /* Normal weight for regular text */
+    color: var(--dark-text);
+}
+
+/* Improve text contrast in tables */
+td, th {
+    font-weight: 500; /* Slightly bolder for table text */
+}
+
+/* Make important text more visible */
+.text-important, .stock-price, .stock-symbol, .prediction-value {
+    font-weight: 600;
+}
+
+/* Improved visibility for sentiment analysis */
+.sentiment-positive {
+    color: var(--positive-color);
+    font-weight: 600;
+}
+
+.sentiment-negative {
+    color: var(--negative-color);
+    font-weight: 600;
+}
+
+.sentiment-neutral {
+    color: var(--warn-color);
+    font-weight: 600;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s;
+    font-weight: 500; /* Slightly bolder links */
+}
+
+a:hover {
+    color: darken(var(--primary-color), 15%);
+    text-decoration: underline;
+}
+
+/* Improve text visibility */
+.text-muted {
+    color: #6c757d !important; /* Slightly darker than default Bootstrap */
+    font-weight: 400;
+}
+
+/* Navigation */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+.navbar .dropdown-menu {
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    background-color: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    font-weight: 500;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+}
+
+/* Stock data styling */
+.stock-price {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.stock-change-positive {
+    color: var(--positive-color);
+}
+
+.stock-change-negative {
+    color: var(--negative-color);
+}
+
+.stock-symbol {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* Portfolio styling */
+.portfolio-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s;
+}
+
+.portfolio-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.portfolio-value {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.portfolio-total {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border-color);
+}
+
+/* Buttons */
+.btn {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+}
+
+.btn-primary:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    border-width: 2px;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-sm {
+    font-size: 0.8rem;
+}
+
+.btn-lg {
+    font-size: 1.1rem;
+    padding: 0.75rem 1.5rem;
+}
+
+.btn-primary.btn-lg {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* Ticker tape */
+.ticker-container {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0.5rem 0;
+}
+
+.ticker-tape {
+    display: inline-block;
+    animation: ticker-scroll 30s linear infinite;
+}
+
+@keyframes ticker-scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+.ticker-item {
+    display: inline-block;
+    padding: 0 1rem;
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+/* Sentiment analysis */
+.sentiment-positive {
+    color: var(--positive-color);
+}
+
+.sentiment-negative {
+    color: var(--negative-color);
+}
+
+.sentiment-neutral {
+    color: var(--warn-color);
+}
+
+.sentiment-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.sentiment-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.sentiment-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Comments & Replies */
+.comment-container {
+    margin-bottom: 1.5rem;
+}
+
+.comment {
+    background-color: var(--card-bg);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.comment-username {
+    font-weight: 700;
+}
+
+.comment-timestamp {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.comment-replies {
+    margin-left: 2rem;
+}
+
+.reply {
+    background-color: var(--hover-bg);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+/* News & Articles */
+.article-card {
+    height: 100%;
+}
+
+.article-meta {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.article-content {
+    margin-top: 1rem;
+}
+
+/* Footer styling for light theme */
+footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+footer h5 {
+    font-weight: 600;
+    color: #212529;
+}
+
+footer p {
+    color: #495057;
+}
+
+footer a {
+    color: var(--primary-color);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    color: #0d6efd;
+    text-decoration: underline;
+}
+
+footer .text-muted {
+    color: #6c757d !important;
+}
+
+.footer-links li a {
+    display: block;
+    padding: 0.25rem 0;
+    font-weight: 500;
+    transition: transform 0.15s ease;
+}
+
+.footer-links li a:hover {
+    transform: translateX(5px);
+}
+
+.footer-links li a i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+}
+
+/* Theme switcher */
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.theme-label {
+    margin-left: 0.5rem;
+    font-weight: 500;
+}
+
+/* Admin dashboard */
+.admin-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.admin-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.admin-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.admin-label {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+/* Loading spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Error messages */
+.alert {
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}

@@ -1,0 +1,536 @@
+/* Enhanced visibility styles for heading content sections and interactive elements */
+
+/* Global text enhancements for better visibility */
+body {
+    font-weight: 500; /* Increased base font weight */
+    letter-spacing: 0.2px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 800 !important; /* Bolder headings */
+    letter-spacing: -0.5px;
+    margin-bottom: 1rem;
+    color: var(--light-primary); /* More prominent heading color */
+    text-shadow: 0 1px 1px rgba(0,0,0,0.05); /* Subtle text shadow for depth */
+}
+
+.dark-theme h1, .dark-theme h2, .dark-theme h3, 
+.dark-theme h4, .dark-theme h5, .dark-theme h6 {
+    color: var(--dark-primary);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+p {
+    font-weight: 500; /* Bolder paragraph text */
+    line-height: 1.7; /* Increased line height for better readability */
+    margin-bottom: 1rem;
+}
+
+/* Enhance all text in cards for better visibility */
+.card-title {
+    font-weight: 700 !important;
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.card-text {
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+/* Make form labels and inputs more visible */
+label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--light-text);
+}
+
+.dark-theme label {
+    color: var(--dark-text);
+}
+
+.form-control {
+    font-weight: 500;
+    color: var(--light-text);
+}
+
+.dark-theme .form-control {
+    color: var(--dark-text);
+}
+
+/* Make heading content sections more visible */
+.row.align-items-center.mb-5.p-4.bg-light {
+    background-color: rgba(255, 255, 255, 0.92) !important; /* More opaque background */
+    border-left: 5px solid var(--light-primary); /* Left border accent */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important; /* Enhanced shadow */
+    border-radius: 8px !important; /* Rounded corners */
+}
+
+/* Dark theme adjustments */
+.dark-theme .row.align-items-center.mb-5.p-4.bg-light {
+    background-color: rgba(30, 30, 30, 0.92) !important;
+    border-left: 5px solid var(--dark-primary);
+}
+
+/* Enhance heading text visibility */
+.display-4 {
+    font-weight: 700 !important; /* Bolder text */
+    color: var(--light-primary) !important; /* Primary color for emphasis */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle text shadow */
+    margin-bottom: 1rem !important;
+}
+
+.dark-theme .display-4 {
+    color: var(--dark-primary) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Make lead text more visible */
+.lead {
+    font-weight: 600 !important; /* Bolder lead text */
+    color: var(--light-text) !important; /* Darker text color */
+    font-size: 1.25rem !important;
+    line-height: 1.6 !important;
+}
+
+.dark-theme .lead {
+    color: var(--dark-text) !important;
+}
+
+/* Make regular paragraph text more visible */
+p {
+    font-weight: 500 !important; /* Medium weight for better visibility */
+    color: var(--light-text-secondary) !important;
+    line-height: 1.7 !important;
+}
+
+.dark-theme p {
+    color: var(--dark-text-secondary) !important;
+}
+
+/* Make feature boxes more visible */
+.feature-box {
+    padding: 1.25rem;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+    border-left: 3px solid var(--light-primary);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.05) 100%);
+    z-index: 1;
+}
+
+.feature-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.95);
+    border-left: 5px solid var(--light-primary);
+}
+
+.feature-box h5 {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 2;
+}
+
+.feature-box p {
+    margin-bottom: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.feature-box i {
+    color: var(--light-primary);
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.feature-box:hover i {
+    transform: scale(1.2);
+}
+
+.dark-theme .feature-box {
+    background-color: rgba(30, 30, 30, 0.7);
+    border-left: 3px solid var(--dark-primary);
+}
+
+.dark-theme .feature-box:hover {
+    background-color: rgba(40, 40, 40, 0.95);
+    border-left: 5px solid var(--dark-primary);
+}
+
+.dark-theme .feature-box i {
+    color: var(--dark-primary);
+}
+
+.me-4.mb-3 {
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.me-4.mb-3:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dark-theme .me-4.mb-3 {
+    background-color: rgba(40, 40, 40, 0.7);
+}
+
+.me-4.mb-3 h5 {
+    font-weight: 700 !important;
+    font-size: 1.15rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* Make icons more prominent */
+.fas {
+    color: var(--light-primary);
+}
+
+.dark-theme .fas {
+    color: var(--dark-primary);
+}
+
+/* Enhanced navbar styling with gradient and interactive elements */
+.navbar {
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.97), rgba(240, 245, 255, 0.97)) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.dark-theme .navbar {
+    background: linear-gradient(to right, rgba(10, 10, 10, 0.97), rgba(15, 20, 30, 0.97)) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Make navbar links more visible and interactive */
+.navbar-nav .nav-link {
+    font-weight: 700 !important; /* Bolder text */
+    color: var(--light-text) !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 6px;
+    transition: all 0.25s ease;
+    margin: 0 0.2rem;
+    position: relative;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--light-primary) !important;
+    background-color: rgba(26, 86, 176, 0.08);
+    transform: translateY(-2px);
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--light-primary) !important;
+    background-color: rgba(26, 86, 176, 0.12);
+    font-weight: 800 !important;
+}
+
+.navbar-nav .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 3px;
+    background-color: var(--light-primary);
+    border-radius: 3px;
+}
+
+.dark-theme .navbar-nav .nav-link {
+    color: var(--dark-text) !important;
+}
+
+.dark-theme .navbar-nav .nav-link:hover {
+    color: var(--dark-primary) !important;
+    background-color: rgba(66, 153, 225, 0.15);
+}
+
+.dark-theme .navbar-nav .nav-link.active {
+    color: var(--dark-primary) !important;
+    background-color: rgba(66, 153, 225, 0.2);
+}
+
+.dark-theme .navbar-nav .nav-link.active::after {
+    background-color: var(--dark-primary);
+}
+
+/* Navbar brand enhancement */
+.navbar-brand {
+    font-weight: 800 !important;
+    font-size: 1.5rem !important;
+    letter-spacing: -0.5px;
+    color: var(--light-primary) !important;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.dark-theme .navbar-brand {
+    color: var(--dark-primary) !important;
+}
+
+/* Make buttons more interactive */
+.btn {
+    font-weight: 600 !important;
+    padding: 0.5rem 1.25rem !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Primary button enhancement */
+.btn-primary {
+    background-color: var(--light-primary) !important;
+    border-color: var(--light-primary) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--hover-primary) !important;
+    border-color: var(--hover-primary) !important;
+}
+
+.dark-theme .btn-primary {
+    background-color: var(--dark-primary) !important;
+    border-color: var(--dark-primary) !important;
+}
+
+/* Outline button enhancement */
+.btn-outline-primary {
+    color: var(--light-primary) !important;
+    border-color: var(--light-primary) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--light-primary) !important;
+    color: white !important;
+}
+
+.dark-theme .btn-outline-primary {
+    color: var(--dark-primary) !important;
+    border-color: var(--dark-primary) !important;
+}
+
+.dark-theme .btn-outline-primary:hover {
+    background-color: var(--dark-primary) !important;
+    color: white !important;
+}
+
+/* Card enhancements */
+.card {
+    border: none !important;
+    border-radius: 8px !important;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1) !important;
+    transition: transform 0.3s, box-shadow 0.3s !important;
+    overflow: hidden !important;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-header {
+    font-weight: 700 !important;
+    padding: 1rem 1.5rem !important;
+}
+
+.card-body {
+    padding: 1.5rem !important;
+}
+
+/* Make card titles more visible */
+.card-title {
+    font-weight: 700 !important;
+    color: var(--light-text) !important;
+    margin-bottom: 1rem !important;
+}
+
+.dark-theme .card-title {
+    color: var(--dark-text) !important;
+}
+
+/* Form control enhancements */
+.form-control, .form-select {
+    padding: 0.75rem 1rem !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--light-border) !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--light-primary) !important;
+    box-shadow: 0 0 0 3px rgba(44, 110, 203, 0.25) !important;
+}
+
+.dark-theme .form-control, .dark-theme .form-select {
+    background-color: rgba(30, 30, 30, 0.9) !important;
+    border-color: var(--dark-border) !important;
+    color: var(--dark-text) !important;
+}
+
+.dark-theme .form-control:focus, .dark-theme .form-select:focus {
+    border-color: var(--dark-primary) !important;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.25) !important;
+}
+
+/* Form label enhancements */
+.form-label {
+    font-weight: 600 !important;
+    color: var(--light-text) !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.dark-theme .form-label {
+    color: var(--dark-text) !important;
+}
+
+/* Table enhancements */
+.table {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.table thead th {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    font-weight: 700 !important;
+    color: var(--light-text) !important;
+    border-bottom: 2px solid var(--light-primary) !important;
+    padding: 1rem !important;
+}
+
+.table tbody td {
+    font-weight: 500 !important;
+    padding: 1rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.dark-theme .table {
+    background-color: rgba(30, 30, 30, 0.9) !important;
+}
+
+.dark-theme .table thead th {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: var(--dark-text) !important;
+    border-bottom: 2px solid var(--dark-primary) !important;
+}
+
+.dark-theme .table tbody td {
+    color: var(--dark-text-secondary) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Alert enhancements */
+.alert {
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    padding: 1rem 1.5rem !important;
+}
+
+.alert-info {
+    background-color: rgba(49, 130, 206, 0.15) !important;
+    color: var(--info) !important;
+    border-left: 4px solid var(--info) !important;
+}
+
+.alert-success {
+    background-color: rgba(56, 161, 105, 0.15) !important;
+    color: var(--positive) !important;
+    border-left: 4px solid var(--positive) !important;
+}
+
+.alert-warning {
+    background-color: rgba(221, 107, 32, 0.15) !important;
+    color: var(--warning) !important;
+    border-left: 4px solid var(--warning) !important;
+}
+
+.alert-danger {
+    background-color: rgba(229, 62, 62, 0.15) !important;
+    color: var(--negative) !important;
+    border-left: 4px solid var(--negative) !important;
+}
+
+/* Badge enhancements */
+.badge {
+    font-weight: 600 !important;
+    padding: 0.5em 0.75em !important;
+    border-radius: 6px !important;
+}
+
+/* Pagination enhancements */
+.pagination .page-link {
+    font-weight: 600 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 6px !important;
+    margin: 0 0.25rem !important;
+    color: var(--light-primary) !important;
+    border: 1px solid var(--light-border) !important;
+    transition: all 0.2s ease !important;
+}
+
+.pagination .page-link:hover {
+    background-color: rgba(44, 110, 203, 0.1) !important;
+    border-color: var(--light-primary) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--light-primary) !important;
+    border-color: var(--light-primary) !important;
+    color: white !important;
+}
+
+.dark-theme .pagination .page-link {
+    color: var(--dark-primary) !important;
+    border-color: var(--dark-border) !important;
+    background-color: rgba(30, 30, 30, 0.9) !important;
+}
+
+.dark-theme .pagination .page-link:hover {
+    background-color: rgba(49, 130, 206, 0.2) !important;
+    border-color: var(--dark-primary) !important;
+}
+
+.dark-theme .pagination .page-item.active .page-link {
+    background-color: var(--dark-primary) !important;
+    border-color: var(--dark-primary) !important;
+}

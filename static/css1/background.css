@@ -1,0 +1,355 @@
+/* Professional color scheme for light and dark themes */
+:root {
+    /* Light theme colors - professional and modern with enhanced contrast */
+    --light-primary: #1a56b0;      /* Darker blue for better contrast */
+    --light-secondary: #2aa04a;    /* Darker green for better contrast */
+    --light-accent: #4a3db8;       /* Darker purple for better contrast */
+    --light-background: #f5f7fa;   /* Keep light background */
+    --light-surface: rgba(255, 255, 255, 0.85); /* More opaque for better readability */
+    --light-text: #0f1a2e;         /* Darker text for better contrast */
+    --light-text-secondary: #2d3748; /* Darker secondary text */
+    --light-border: rgba(226, 232, 240, 0.9); /* More visible borders */
+    --light-shadow: rgba(0, 0, 0, 0.15); /* Slightly stronger shadows */
+    
+    /* Dark theme colors - true black with accents */
+    --dark-primary: #4299e1;       /* Brighter blue for dark theme */
+    --dark-secondary: #4fd1c5;     /* Brighter teal for dark theme */
+    --dark-accent: #9f7aea;        /* Brighter purple for dark theme */
+    --dark-background: #000000;    /* Keep true black background */
+    --dark-surface: rgba(18, 18, 18, 0.8); /* More opaque for better readability */
+    --dark-text: #ffffff;          /* Pure white text for maximum contrast */
+    --dark-text-secondary: #e2e8f0; /* Lighter secondary text */
+    --dark-border: rgba(45, 55, 72, 0.9); /* More visible borders */
+    --dark-shadow: rgba(0, 0, 0, 0.4); /* Stronger shadows */
+    
+    /* Common variables with enhanced visibility */
+    --positive: #2f855a;           /* Darker green for better contrast */
+    --negative: #c53030;           /* Darker red for better contrast */
+    --warning: #c05621;            /* Darker orange for better contrast */
+    --info: #2b6cb0;               /* Darker blue for better contrast */
+    
+    /* Interactive colors */
+    --hover-primary: #2563eb;      /* Hover color for primary elements */
+    --hover-secondary: #059669;    /* Hover color for secondary elements */
+    --active-primary: #1e40af;     /* Active color for primary elements */
+    --active-secondary: #047857;   /* Active color for secondary elements */
+    
+    /* Glass effect variables - enhanced for better visibility */
+    --glass-opacity: 0.85;         /* More opaque glass */
+    --glass-blur: 8px;             /* Less blur for better text readability */
+    --glass-border: 1px;           /* Keep border thickness */
+}
+
+/* Stock market background with enhanced visibility */
+body {
+    background-color: var(--light-background);
+    background-image: 
+        /* Stock chart pattern overlay - more visible */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cpath d='M0,0 L0,800 M50,700 L50,100 M100,650 L100,150 M150,500 L150,300 M200,600 L200,200 M250,550 L250,250 M300,700 L300,100 M350,450 L350,350 M400,550 L400,250 M450,400 L450,400 M500,650 L500,150 M550,500 L550,300 M600,600 L600,200 M650,450 L650,350 M700,700 L700,100 M750,550 L750,250 M800,500 L800,300' stroke='rgba(44, 110, 203, 0.2)' stroke-width='2'/%3E%3Cpath d='M0,400 L800,400' stroke='rgba(44, 110, 203, 0.3)' stroke-width='1' stroke-dasharray='5,5'/%3E%3Cpath d='M0,200 L800,200 M0,600 L800,600' stroke='rgba(44, 110, 203, 0.2)' stroke-width='1' stroke-dasharray='3,3'/%3E%3Cpath d='M0,700 L50,650 L100,670 L150,620 L200,580 L250,600 L300,550 L350,500 L400,520 L450,480 L500,450 L550,470 L600,420 L650,380 L700,400 L750,350 L800,370' stroke='rgba(52, 199, 89, 0.6)' stroke-width='3' fill='none'/%3E%3Cpath d='M0,500 L50,520 L100,480 L150,500 L200,550 L250,530 L300,580 L350,600 L400,550 L450,570 L500,620 L550,580 L600,600 L650,650 L700,620 L750,670 L800,650' stroke='rgba(229, 62, 62, 0.6)' stroke-width='3' fill='none'/%3E%3C/svg%3E"),
+        /* Stock market building/cityscape silhouette - more visible */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='200' viewBox='0 0 1200 200' preserveAspectRatio='none'%3E%3Cpath d='M0,200 L0,110 L20,110 L20,90 L40,90 L40,130 L60,130 L60,100 L80,100 L80,120 L100,120 L100,80 L120,80 L120,90 L140,90 L140,100 L160,100 L160,70 L180,70 L180,90 L200,90 L200,40 L220,40 L220,60 L240,60 L240,50 L260,50 L260,80 L280,80 L280,60 L300,60 L300,30 L320,30 L320,70 L340,70 L340,40 L360,40 L360,80 L380,80 L380,60 L400,60 L400,50 L420,50 L420,70 L440,70 L440,80 L460,80 L460,70 L480,70 L480,90 L500,90 L500,60 L520,60 L520,70 L540,70 L540,80 L560,80 L560,90 L580,90 L580,60 L600,60 L600,90 L620,90 L620,80 L640,80 L640,60 L660,60 L660,70 L680,70 L680,60 L700,60 L700,40 L720,40 L720,50 L740,50 L740,30 L760,30 L760,50 L780,50 L780,70 L800,70 L800,60 L820,60 L820,80 L840,80 L840,50 L860,50 L860,90 L880,90 L880,70 L900,70 L900,90 L920,90 L920,100 L940,100 L940,60 L960,60 L960,80 L980,80 L980,70 L1000,70 L1000,90 L1020,90 L1020,60 L1040,60 L1040,70 L1060,70 L1060,50 L1080,50 L1080,80 L1100,80 L1100,70 L1120,70 L1120,50 L1140,50 L1140,80 L1160,80 L1160,100 L1180,100 L1180,80 L1200,80 L1200,200 Z' fill='rgba(28, 43, 70, 0.7)'/%3E%3C/svg%3E"),
+        /* Digital grid pattern - more visible */
+        linear-gradient(rgba(44, 110, 203, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(44, 110, 203, 0.05) 1px, transparent 1px),
+        /* Main gradient background - professional colors */
+        linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 50%, #f5f7fa 100%);
+    background-size: 
+        800px 800px, /* Stock chart pattern */
+        100% 200px, /* Cityscape silhouette */
+        20px 20px, /* Digital grid - horizontal lines */
+        20px 20px, /* Digital grid - vertical lines */
+        100% 100%; /* Main gradient */
+    background-position: 
+        center center, /* Stock chart pattern */
+        bottom center, /* Cityscape silhouette */
+        center center, /* Digital grid - horizontal lines */
+        center center, /* Digital grid - vertical lines */
+        center center; /* Main gradient */
+    background-repeat: repeat, repeat-x, repeat, repeat, no-repeat;
+    background-attachment: fixed;
+    position: relative;
+    animation: chartMove 120s linear infinite;
+    color: var(--light-text);
+}
+
+/* Animated background effect */
+@keyframes chartMove {
+    0% { background-position: 0% 0%, bottom center, center center, center center, center center; }
+    100% { background-position: 100% 100%, bottom center, center center, center center, center center; }
+}
+
+/* Dark theme overrides */
+body.dark-theme {
+    background-color: var(--dark-background);
+    background-image: 
+        /* Stock chart pattern overlay - dark theme */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cpath d='M0,0 L0,800 M50,700 L50,100 M100,650 L100,150 M150,500 L150,300 M200,600 L200,200 M250,550 L250,250 M300,700 L300,100 M350,450 L350,350 M400,550 L400,250 M450,400 L450,400 M500,650 L500,150 M550,500 L550,300 M600,600 L600,200 M650,450 L650,350 M700,700 L700,100 M750,550 L750,250 M800,500 L800,300' stroke='rgba(49, 130, 206, 0.2)' stroke-width='2'/%3E%3Cpath d='M0,400 L800,400' stroke='rgba(49, 130, 206, 0.3)' stroke-width='1' stroke-dasharray='5,5'/%3E%3Cpath d='M0,200 L800,200 M0,600 L800,600' stroke='rgba(49, 130, 206, 0.2)' stroke-width='1' stroke-dasharray='3,3'/%3E%3Cpath d='M0,700 L50,650 L100,670 L150,620 L200,580 L250,600 L300,550 L350,500 L400,520 L450,480 L500,450 L550,470 L600,420 L650,380 L700,400 L750,350 L800,370' stroke='rgba(56, 161, 105, 0.6)' stroke-width='3' fill='none'/%3E%3Cpath d='M0,500 L50,520 L100,480 L150,500 L200,550 L250,530 L300,580 L350,600 L400,550 L450,570 L500,620 L550,580 L600,600 L650,650 L700,620 L750,670 L800,650' stroke='rgba(229, 62, 62, 0.6)' stroke-width='3' fill='none'/%3E%3C/svg%3E"),
+        /* Stock market building/cityscape silhouette - dark theme */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='200' viewBox='0 0 1200 200' preserveAspectRatio='none'%3E%3Cpath d='M0,200 L0,110 L20,110 L20,90 L40,90 L40,130 L60,130 L60,100 L80,100 L80,120 L100,120 L100,80 L120,80 L120,90 L140,90 L140,100 L160,100 L160,70 L180,70 L180,90 L200,90 L200,40 L220,40 L220,60 L240,60 L240,50 L260,50 L260,80 L280,80 L280,60 L300,60 L300,30 L320,30 L320,70 L340,70 L340,40 L360,40 L360,80 L380,80 L380,60 L400,60 L400,50 L420,50 L420,70 L440,70 L440,80 L460,80 L460,70 L480,70 L480,90 L500,90 L500,60 L520,60 L520,70 L540,70 L540,80 L560,80 L560,90 L580,90 L580,60 L600,60 L600,90 L620,90 L620,80 L640,80 L640,60 L660,60 L660,70 L680,70 L680,60 L700,60 L700,40 L720,40 L720,50 L740,50 L740,30 L760,30 L760,50 L780,50 L780,70 L800,70 L800,60 L820,60 L820,80 L840,80 L840,50 L860,50 L860,90 L880,90 L880,70 L900,70 L900,90 L920,90 L920,100 L940,100 L940,60 L960,60 L960,80 L980,80 L980,70 L1000,70 L1000,90 L1020,90 L1020,60 L1040,60 L1040,70 L1060,70 L1060,50 L1080,50 L1080,80 L1100,80 L1100,70 L1120,70 L1120,50 L1140,50 L1140,80 L1160,80 L1160,100 L1180,100 L1180,80 L1200,80 L1200,200 Z' fill='rgba(255, 255, 255, 0.15)'/%3E%3C/svg%3E"),
+        /* Digital grid pattern - dark theme */
+        linear-gradient(rgba(49, 130, 206, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(49, 130, 206, 0.07) 1px, transparent 1px),
+        /* Main gradient background - true black */
+        linear-gradient(135deg, #000000 0%, #121212 50%, #000000 100%);
+    color: var(--dark-text);
+}
+
+/* Fully transparent overlay for light theme */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.4); /* More transparent */
+    backdrop-filter: blur(1px); /* Minimal blur for better text contrast */
+    z-index: -1;
+}
+
+/* Fully transparent overlay for dark theme */
+body.dark-theme::before {
+    background-color: rgba(0, 0, 0, 0.4); /* More transparent */
+    backdrop-filter: blur(1px); /* Minimal blur */
+}
+
+/* Enhanced main content area with more transparency */
+main.container {
+    background-color: rgba(255, 255, 255, 0.4) !important; /* More transparent */
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+    padding: 25px !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    position: relative !important;
+    z-index: 1 !important;
+    border: var(--glass-border) solid rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Dark theme main content */
+body.dark-theme main.container {
+    background-color: rgba(18, 18, 18, 0.4) !important; /* More transparent */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    border: var(--glass-border) solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Interactive hover effect for main content */
+main.container:hover {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.4) !important;
+}
+
+body.dark-theme main.container:hover {
+    background-color: rgba(18, 18, 18, 0.5) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Enhanced text visibility with bold styling */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 800 !important; /* Extra bold headings */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    color: var(--light-text) !important;
+    letter-spacing: -0.02em !important;
+    margin-bottom: 1.2rem !important;
+}
+
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme h5,
+body.dark-theme h6 {
+    color: var(--dark-text) !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Make all text bold and more visible */
+p, li, td, th, .nav-link, .btn, .form-control, .form-label, span {
+    font-weight: 600 !important; /* Bold all text */
+    color: var(--light-text) !important;
+}
+
+body.dark-theme p,
+body.dark-theme li,
+body.dark-theme td,
+body.dark-theme th,
+body.dark-theme .nav-link,
+body.dark-theme .btn,
+body.dark-theme .form-control,
+body.dark-theme .form-label,
+body.dark-theme span {
+    color: var(--dark-text) !important;
+}
+
+/* Glass effect cards with high transparency */
+.card {
+    background-color: rgba(255, 255, 255, 0.4) !important; /* More transparent */
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+    border: var(--glass-border) solid rgba(255, 255, 255, 0.2) !important;
+    border-left: 4px solid var(--light-primary) !important;
+    transition: all 0.3s ease !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+}
+
+body.dark-theme .card {
+    background-color: rgba(18, 18, 18, 0.4) !important; /* More transparent */
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    border: var(--glass-border) solid rgba(255, 255, 255, 0.1) !important;
+    border-left: 4px solid var(--dark-primary) !important;
+}
+
+/* Interactive card hover effects */
+.card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.5) !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+body.dark-theme .card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+    background-color: rgba(18, 18, 18, 0.5) !important;
+}
+
+/* Transparent card header */
+.card-header {
+    background-color: rgba(44, 110, 203, 0.1) !important;
+    border-bottom: 2px solid rgba(44, 110, 203, 0.2) !important;
+    font-weight: 700 !important;
+    color: var(--light-text) !important;
+    padding: 15px 20px !important;
+}
+
+body.dark-theme .card-header {
+    background-color: rgba(49, 130, 206, 0.1) !important;
+    border-bottom: 2px solid rgba(49, 130, 206, 0.2) !important;
+    color: var(--dark-text) !important;
+}
+
+/* Transparent navbar with glass effect */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1) !important;
+    border-bottom: var(--glass-border) solid rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+body.dark-theme .navbar {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2) !important;
+    border-bottom: var(--glass-border) solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Interactive navbar on scroll */
+.navbar.scrolled {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.dark-theme .navbar.scrolled {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Enhanced stock market ticker tape */
+.ticker-container {
+    background-color: rgba(28, 43, 70, 0.7) !important;
+    color: var(--light-text) !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    padding: 0.5rem 0 !important;
+    border-bottom: var(--glass-border) solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+}
+
+body.dark-theme .ticker-container {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Interactive stock chart containers with high transparency */
+.chart-container {
+    background-color: rgba(255, 255, 255, 0.4) !important; /* More transparent */
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border-radius: 8px !important;
+    padding: 15px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 25px !important;
+    border: var(--glass-border) solid rgba(44, 110, 203, 0.2) !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+body.dark-theme .chart-container {
+    background-color: rgba(18, 18, 18, 0.4) !important; /* More transparent */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    border: var(--glass-border) solid rgba(49, 130, 206, 0.2) !important;
+}
+
+/* Interactive hover effect for charts */
+.chart-container:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    border-color: rgba(44, 110, 203, 0.4) !important;
+}
+
+body.dark-theme .chart-container:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+    background-color: rgba(18, 18, 18, 0.5) !important;
+    border-color: rgba(49, 130, 206, 0.4) !important;
+}
+
+/* Transparent tables with glass effect */
+table.table {
+    background-color: rgba(255, 255, 255, 0.4) !important; /* More transparent */
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+    border: none !important;
+}
+
+body.dark-theme table.table {
+    background-color: rgba(18, 18, 18, 0.4) !important; /* More transparent */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Transparent form controls */
+.form-control, .form-select {
+    background-color: rgba(255, 255, 255, 0.4) !important; /* More transparent */
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 2px solid rgba(44, 110, 203, 0.3) !important;
+    border-radius: 6px !important;
+    padding: 10px 15px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+body.dark-theme .form-control,
+body.dark-theme .form-select {
+    background-color: rgba(18, 18, 18, 0.4) !important; /* More transparent */
+    border: 2px solid rgba(49, 130, 206, 0.3) !important;
+    color: var(--dark-text) !important;
+}
+
+/* Interactive form controls */
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(44, 110, 203, 0.3) !important;
+    border-color: rgba(44, 110, 203, 0.5) !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.3) !important;
+    border-color: rgba(49, 130, 206, 0.5) !important;
+    background-color: rgba(18, 18, 18, 0.5) !important;
+}
