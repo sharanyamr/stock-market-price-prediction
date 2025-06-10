@@ -1,0 +1,91 @@
+Project Title:
+Build a Stock Market Prediction Web Application using Flask, PostgreSQL, yFinance, and Twitter API with full frontend in HTML/CSS/JavaScript/Bootstrap 5.
+
+
+
+> Core Features:
+
+
+
+Stock Price Prediction using machine learning models (e.g., ARIMA, LSTM, Linear Regression) based on historical data fetched from yfinance.
+
+Sentiment Analysis using Twitter API (tweepy) to analyze public tweets about stocks and predict market sentiment.
+
+Allow users to post comments on stocks' sentiment results and reply to comments (like threaded discussions).
+
+Stock Trading Simulation: Users can buy and sell stocks manually in their portfolio using real-time prices (fetched from yfinance).
+
+Portfolio Management Dashboard: Show users their holdings, stock quantities, average buy price, current price, portfolio value, and profits/losses.
+
+Education Section: Create a blog or article page where users can read educational articles about investing and stock markets.
+
+News Section: Fetch and display the latest stock market news articles (use any free news API like NewsAPI.org).
+
+Currency Converter: Add a simple currency conversion tool using an external API like ExchangeRate-API or Fixer.io.
+
+Live Stock Tickers: Add a ticker tape at the top of the page showing live stock symbols and prices.
+
+User Authentication: Login, Register, Logout using Flask sessions.
+
+Admin Panel: To manage articles, users, and moderate comments.
+
+
+> Database:
+Use PostgreSQL with tables for:
+
+
+
+users
+
+portfolio
+
+sentiment_comments
+
+sentiment_replies
+
+education_articles
+
+news_articles
+
+
+> Backend Stack:
+
+
+
+Flask
+
+yFinance
+
+Tweepy (for Twitter API)
+
+SQLAlchemy (ORM) or psycopg2 (direct PostgreSQL connection)
+
+Machine Learning Libraries: sklearn, statsmodels, keras (for ARIMA, LSTM, etc.)
+
+
+> Frontend Stack:
+
+
+
+HTML
+
+CSS
+
+JavaScript
+
+Bootstrap 5
+
+Chart.js (for stock charts)
+
+AJAX (for smoother comment replies or ticker updates)
+
+
+> Bonus (optional):
+
+
+
+Add Dark Mode toggle.
+
+Use Flask-Admin for admin dashboards.
+
+Add email notifications when prediction models detect strong Buy/Sell signals.
