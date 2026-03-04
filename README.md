@@ -33,6 +33,6 @@ StockSage is a full-stack web application built with Flask and PostgreSQL that l
 - Machine Learning: scikit-learn, statsmodels, Keras (LSTM)
 
 **Database:**
-- PostgreSQL
+- MYSQL
 
 
